@@ -74,14 +74,14 @@ If licensed under the Simplified BSD License:
  * @copyright Copyright (c) 2010, Confident Technologies, Inc.
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU GPL v2.0 or later
  * @license   http://www.opensource.org/licenses/bsd-license.php Simplified BSD License
- * @version   20100621_PHP_1
+ * @version   20100621_PHP_2
  */
 
 /**
  * Response from a Confident CAPTCHA API call
  * @package confidentcaptcha-php
  */
-class ConfidentCaptchaApiResponse
+class CCAP_ApiResponse
 {
     /**
      * HTTP status code returned by API
@@ -102,12 +102,12 @@ class ConfidentCaptchaApiResponse
     var $body;
 
     /**
-     * Construct a ConfidentCaptchaApiResponse
+     * Construct a CCAP_ApiResponse
      *
      * @param integer $status HTTP status code
      * @param string  $body   HTTP response body
      */
-    public function ConfidentCaptchaApiResponse($status, $body)
+    public function CCAP_ApiResponse($status, $body)
     {
         $this->$status = $status;
         $this->$body   = $body;
@@ -122,31 +122,31 @@ class ConfidentCaptchaApiResponse
  * {@link http://captcha.confidenttechnologies.com}
  * @package confidentcaptcha-php
  */
-class ConfidentCaptchaApi
+class CCAP_Api
 {
     /**
      * API Customer ID (same for all sites created by your account)
      * @var string
      */
-    var $customer_id;
+    protected var $customer_id;
 
     /**
      * API Site ID (unique to the a website or even webpage)
      * @var string
      */
-    var $site_id;
+    protected var $site_id;
 
     /**
      * API Username (secret associated with site)
      * @var string
      */
-    var $api_username;
+    protected var $api_username;
 
     /**
      * API Password (secret associated with site)
      * @var string
      */
-    var $api_password;
+    protected var $api_password;
 
     /**
      * Confident CAPTCHA API Server URL
@@ -155,7 +155,7 @@ class ConfidentCaptchaApi
      * told differently by Confident Technologies technical support.
      * @var string
      */
-    var $captcha_server_url;
+    protected var $captcha_server_url;
 
     /**
      * Version of this library
@@ -181,11 +181,11 @@ class ConfidentCaptchaApi
      * 
      * @var string
      */
-    var $library_version;
+    protected var $library_version;
 
 
     /**
-     * Construct a ConfidentCaptchaApi with API credentials
+     * Construct a CCAP_Api with API credentials
      *
      * All API credentials come from your account on
      * {@link https://login.confidenttechnologies.com}
@@ -200,7 +200,7 @@ class ConfidentCaptchaApi
      * @param string $library_version    This library's version string
      * @param string $captcha_server_url Confident CAPTCHA API Server URL
      */
-    public function ConfidentCaptchaApi($customer_id, $site_id, $api_username,
+    public function CCAP_Api($customer_id, $site_id, $api_username,
         $api_password, $library_version = '20100621_PHP_1',
         $captcha_server_url = 'http://captcha.confidenttechnologies.com',
         )
@@ -220,7 +220,7 @@ class ConfidentCaptchaApi
      * @param string  $method          The HTTP method to use
      * @param array   $params          The parameters to send
      * @param boolean $use_credentials Include API credentials in call
-     * @return ConfidentCaptchaApiResponse  The response
+     * @return CCAP_ApiResponse  The response
      */
     protected function call($resource, $method = "POST", $params=null,
         $use_credentials=True
@@ -259,12 +259,12 @@ class ConfidentCaptchaApi
         $body = curl_exec($ch);
 
         if ($body === false) {
-            $response = ConfidentCaptchaApiResponse(
+            $response = CCAP_ApiResponse(
                 curl_getinfo($ch, CURLINFO_HTTP_CODE),
                 curl_error($ch)
             );
         } else {
-            $response = ConfidentCaptchaApiResponse(
+            $response = CCAP_ApiResponse(
                 curl_getinfo($ch, CURLINFO_HTTP_CODE),
                 $body
             );
@@ -308,7 +308,7 @@ class ConfidentCaptchaApi
     /**
      * Check that API credentials and other settings are valid.
      *
-     * @return ConfidentCaptchaApiResponse  body is an HTML table describing
+     * @return CCAP_ApiResponse  body is an HTML table describing
      *  if the API credentials are valid.  If the string "api_failed='True'"
      *  appears in the response, then other calls will fail.
      */
@@ -332,7 +332,7 @@ class ConfidentCaptchaApi
      * attempt succeeded or failed, and generate a new visual CAPTCHA without
      * refreshing the page (JavaScript and a callback required).
      *
-     * @return ConfidentCaptchaApiResponse  If success, body is block_id
+     * @return CCAP_ApiResponse  If success, body is block_id
      */
     public function create_block()
     {
@@ -355,7 +355,7 @@ class ConfidentCaptchaApi
      * @param integer $length        Number of pictures the user must pick
      * @param integer $code_color    Color of letter code on pictures
      *
-     * @return ConfidentCaptchaApiResponse  If success, status is 200 and body
+     * @return CCAP_ApiResponse  If success, status is 200 and body
      *  is partial HTML to inject into page.  If status is 410, then the end
      *  user has used up all their attempts.
      */
@@ -395,7 +395,7 @@ class ConfidentCaptchaApi
      * @param string $visual_id  Visual ID in return from {@link create_visual()}
      * @param string $code       User's CAPTCHA solution
      *
-     * @return ConfidentCaptchaApiResponse The body is 'True' if the solution was
+     * @return CCAP_ApiResponse The body is 'True' if the solution was
      *  correct, 'False' if incorrect or unknown captcha_id
      */
     public function check_visual($block_id, $visual_id, $code)
@@ -414,7 +414,7 @@ class ConfidentCaptchaApi
      * @param string $block_id     Block ID returned from {@link create_block()}
      * @param string $phone_number User's 10-digit US phone number
      *
-     * @return ConfidentCaptchaApiResponse If successful, status is 200 and
+     * @return CCAP_ApiResponse If successful, status is 200 and
      *  body is an audio_id used to check if the call completed successfully
      */
     public function start_audio($block_id, $phone_number)
@@ -429,7 +429,7 @@ class ConfidentCaptchaApi
      * @param string $block_id Block ID returned from {@link create_block()}
      * @param string $audio_id Audio ID in return from {@link start_audio()}
      *
-     * @return ConfidentCaptchaApiResponse
+     * @return CCAP_ApiResponse
      */
     public function check_audio($block_id, $audio_id)
     {
@@ -454,7 +454,7 @@ class ConfidentCaptchaApi
      * @param integer $length        Number of pictures the user must pick
      * @param integer $code_color    Color of letter code on pictures
      *
-     * @return ConfidentCaptchaApiResponse  If success, status is 200 and body
+     * @return CCAP_ApiResponse  If success, status is 200 and body
      *  is partial HTML to inject into page.  If status is 410, then the end
      *  user has used up all their attempts.
      */
@@ -490,7 +490,7 @@ class ConfidentCaptchaApi
      * @param string $captcha_id CAPTCHA ID in return from {@link create_captcha()}
      * @param string $code       User's CAPTCHA solution
      *
-     * @return ConfidentCaptchaApiResponse The body is 'True' if the solution was
+     * @return CCAP_ApiResponse The body is 'True' if the solution was
      *  correct, 'False' if incorrect or unknown captcha_id
      */
     public function check_captcha($captcha_id, $code)
@@ -509,7 +509,7 @@ class ConfidentCaptchaApi
      *
      * @param string $phone_number User's 10-digit US phone number
      *
-     * @return ConfidentCaptchaApiResponse If successful, the status is 200
+     * @return CCAP_ApiResponse If successful, the status is 200
      *  and the body is a onekey_id used to check if the call completed
      *  successfully
      */
@@ -526,7 +526,7 @@ class ConfidentCaptchaApi
      *
      * @param string $onekey_id One Key ID in return from start_audio()
      *
-     * @return ConfidentCaptchaApiResponse
+     * @return CCAP_ApiResponse
      */
     public function check_onekey($onekey_id)
     {
@@ -535,6 +535,3 @@ class ConfidentCaptchaApi
 }
 
 // vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: 
-
-
-
