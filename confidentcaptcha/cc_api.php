@@ -318,6 +318,14 @@ class ConfidentCaptchaApi
     }
 
     /**
+     * Get API version XML
+     */
+    public function version()
+    {
+        return $this->call('/version', 'GET', null, false);
+    }
+
+    /**
      * Create a multiple-CAPTCHA block.
      *
      * This can be used to give the end user quick feedback if the CAPTCHA
@@ -333,7 +341,7 @@ class ConfidentCaptchaApi
     }
 
     /**
-     * Create a CAPTCHA instance in a multiple-CAPTCHA block
+     * Create a visual CAPTCHA in a multiple-CAPTCHA block
      *
      * For security, the width, height, and length must define a visual
      * CAPTCHA that has a low probability of randomly guessing.  Some
@@ -347,11 +355,11 @@ class ConfidentCaptchaApi
      * @param integer $length        Number of pictures the user must pick
      * @param integer $code_color    Color of letter code on pictures
      *
-     * @return ConfidentCaptchaApiResponse  If success, body is partial HTML
-     *  inject into page.  If status is 410, then the end user has used up all
-     *  their attempts.
+     * @return ConfidentCaptchaApiResponse  If success, status is 200 and body
+     *  is partial HTML to inject into page.  If status is 410, then the end
+     *  user has used up all their attempts.
      */
-    public function create_instance($block_id, $display_style='flyout', 
+    public function create_visual($block_id, $display_style='flyout', 
         $include_audio=false, $height=3, $width=3, $length=4, 
         $code_color='White')
     {
@@ -373,44 +381,32 @@ class ConfidentCaptchaApi
             $params['image_code_color'] = $code_color;
         }
 
-        // Store settings for callback
-        /*
-        if (isset($_SESSION)) {
-            $_SESSION['confidentcaptcha_display_style'] = $display_style;
-            $_SESSION['confidentcaptcha_include_audio'] = $include_audio;
-            $_SESSION['confidentcaptcha_height'] = $height;
-            $_SESSION['confidentcaptcha_width'] = $width;
-            $_SESSION['confidentcaptcha_captcha_length'] = $length;
-            $_SESSION['confidentcaptcha_code_color'] = $code_color;
-        }
-        */
-
         return call("/block/$block_id/visual", 'POST', $params, false);
     }
 
     /**
-     * Check a CAPTCHA instance in a multiple-CAPTCHA block
+     * Check a visual CAPTCHA in a multiple-CAPTCHA block
      *
      * For security, the width, height, and length must define a visual
      * CAPTCHA that has a low probability of randomly guessing.  Some
      * acceptable values are 3x3 w/ length 4, or 4x4 w/ length 3.
      *
      * @param string $block_id   Block ID returned from {@link create_block()}
-     * @param string $captcha_id CAPTCHA ID in return from {@link create_instance()}
+     * @param string $visual_id  Visual ID in return from {@link create_visual()}
      * @param string $code       User's CAPTCHA solution
      *
      * @return ConfidentCaptchaApiResponse The body is 'True' if the solution was
      *  correct, 'False' if incorrect or unknown captcha_id
      */
-    public function check_instance($block_id, $captcha_id, $code)
+    public function check_visual($block_id, $visual_id, $code)
     {
         $params = Array('code' => $code);
-        $resource = "/block/$block_id/visual/$captcha_id"
+        $resource = "/block/$block_id/visual/$visual_id"
         return call($resource, 'POST', $params, false);
     }
 
     /**
-     * Start a voice CAPTCHA by calling the user
+     * Start an audio CAPTCHA by calling the user
      *
      * Audio CAPTCHA must be enabled for your account.  Only US numbers
      * are currently supported.
@@ -418,26 +414,26 @@ class ConfidentCaptchaApi
      * @param string $block_id     Block ID returned from {@link create_block()}
      * @param string $phone_number User's 10-digit US phone number
      *
-     * @return ConfidentCaptchaApiResponse If successful, body is an audio_id
-     *  used to check if the call completed successfully
+     * @return ConfidentCaptchaApiResponse If successful, status is 200 and
+     *  body is an audio_id used to check if the call completed successfully
      */
-    public function start_block_onekey($block_id, $phone_number)
+    public function start_audio($block_id, $phone_number)
     {
         $params = Array('phone_number' => $phone_number);
         return call("/block/$block_id/audio", 'POST', $params, false);
     }
 
     /**
-     * Check the progress of a voice CAPTCHA
+     * Check the progress of an audio CAPTCHA
      *
-     * @param string $block_id   Block ID returned from {@link create_block()}
-     * @param string $captcha_id CAPTCHA ID in return from {@link start_block_onekey()}
+     * @param string $block_id Block ID returned from {@link create_block()}
+     * @param string $audio_id Audio ID in return from {@link start_audio()}
      *
      * @return ConfidentCaptchaApiResponse
      */
-    public function check_block_onekey($block_id, $captcha_id)
+    public function check_audio($block_id, $audio_id)
     {
-        return call("/block/$block_id/audio/$captcha_id", 'GET', null, false);
+        return call("/block/$block_id/audio/$audio_id", 'GET', null, false);
     }
 
     /**
@@ -449,7 +445,7 @@ class ConfidentCaptchaApi
      * CAPTCHA that has a low probability of randomly guessing.  Some
      * acceptable values are 3x3 w/ length 4, or 4x4 w/ length 3.
      *
-     * @deprecated Prefer {@link create_block()} / {@link create_instance()}
+     * @deprecated Prefer {@link create_block()} / {@link create_visual()}
      *
      * @param string  $display_style 'flyout' or 'lightbox'
      * @param boolean $include_audio Include audio CAPTCHA (if enabled for site)
@@ -458,9 +454,9 @@ class ConfidentCaptchaApi
      * @param integer $length        Number of pictures the user must pick
      * @param integer $code_color    Color of letter code on pictures
      *
-     * @return ConfidentCaptchaApiResponse  If success, body is partial HTML
-     *  inject into page.  If status is 410, then the end user has used up all
-     *  their attempts.
+     * @return ConfidentCaptchaApiResponse  If success, status is 200 and body
+     *  is partial HTML to inject into page.  If status is 410, then the end
+     *  user has used up all their attempts.
      */
     public function create_captcha($display_style='flyout',
         $include_audio=false, $height=3, $width=3, $length=4,
@@ -489,7 +485,7 @@ class ConfidentCaptchaApi
      * NOTE - The parameter order is different than the check_captcha
      * call from earlier versions of this library.
      *
-     * @deprecated Prefer {@link check_instance()}
+     * @deprecated Prefer {@link check_visual()}
      *
      * @param string $captcha_id CAPTCHA ID in return from {@link create_captcha()}
      * @param string $code       User's CAPTCHA solution
@@ -509,12 +505,13 @@ class ConfidentCaptchaApi
      * Audio CAPTCHA must be enabled for your account.  Only US numbers
      * are currently supported.
      *
-     * @deprecated Prefer {@link create_block()} / {@link start_block_onekey()}
+     * @deprecated Prefer {@link create_block()} / {@link start_audio()}
      *
      * @param string $phone_number User's 10-digit US phone number
      *
-     * @return ConfidentCaptchaApiResponse If successful, body is an audio_id
-     *  used to check if the call completed successfully
+     * @return ConfidentCaptchaApiResponse If successful, the status is 200
+     *  and the body is a onekey_id used to check if the call completed
+     *  successfully
      */
     public function start_onekey($phone_number)
     {
@@ -525,15 +522,15 @@ class ConfidentCaptchaApi
     /**
      * Check the progress of a voice CAPTCHA
      *
-     * @deprecated Prefer {@link check_block_onekey()}
+     * @deprecated Prefer {@link check_audio()}
      *
-     * @param string $captcha_id CAPTCHA ID in return from start_block_onekey()
+     * @param string $onekey_id One Key ID in return from start_audio()
      *
      * @return ConfidentCaptchaApiResponse
      */
-    public function check_onekey($captcha_id)
+    public function check_onekey($onekey_id)
     {
-        return call("/onekey/$captcha_id", 'POST');
+        return call("/onekey/$onekey_id", 'POST');
     }
 }
 
