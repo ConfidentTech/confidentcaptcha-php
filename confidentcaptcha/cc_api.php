@@ -486,6 +486,9 @@ class ConfidentCaptchaApi
      * CAPTCHA that has a low probability of randomly guessing.  Some
      * acceptable values are 3x3 w/ length 4, or 4x4 w/ length 3.
      *
+     * NOTE - The parameter order is different than the check_captcha
+     * call from earlier versions of this library.
+     *
      * @deprecated Prefer {@link check_instance()}
      *
      * @param string $captcha_id CAPTCHA ID in return from {@link create_captcha()}
