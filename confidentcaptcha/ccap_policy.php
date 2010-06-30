@@ -99,6 +99,19 @@ abstract class CCAP_Policy
     protected var $api;
 
     /**
+     * CAPTCHA type - multiple or single
+     *
+     * With multiple CAPTCHA, JavaScript can give a user instant feedback and
+     * a chance to try again without refreshing the page.  With single CAPTCHA,
+     * checking is always done on form POST, and failure requires a page
+     * refresh.
+     *
+     * Since single CAPTCHA is just a special case of multiple CAPTCHA, it
+     * will probably go away in future API versions.
+     */
+    protected var $captcha_type = 'multiple';
+
+    /**
      * Block ID for multiple captcha
      * @var string
      */
@@ -151,7 +164,6 @@ abstract class CCAP_Policy
         $this->$api = $api;
     }
 
-
     /**
      * Handle API failures
      *
@@ -165,7 +177,6 @@ abstract class CCAP_Policy
         $api_func_name, $response);
 
     /**
-
      * Create a visual CAPTCHA
      *
      * If 'multiple' is chosen (recommended), then a block is created as
@@ -181,18 +192,20 @@ abstract class CCAP_Policy
      *
      * @return string HTML fragment to inject into page
      */
-    public function create_visual($captcha_type='multiple',
+    public function create_visual($captcha_type=NULL,
         $display_style=NULL, $include_audio=NULL, $height=NULL, $width=NULL,
         $length=NULL, $code_color=NULL)
     {
         // Pick CAPTCHA type, preferring multiple
-        if ($captcha_type == 'single') {
-            $ctype = 'single';
-        } else {
-            $ctype = 'multiple';
+        if (!is_null($captcha_type)) {
+            if ($captcha_type == 'single') {
+                $this->captcha_type = 'single';
+            } else {
+                $this->captcha_type = 'multiple';
+            }
         }
 
-        if ($ctype == 'multiple') {
+        if ($this->captcha_type == 'multiple') {
             // Get a block_id if needed
             if (is_null($this->block_id))  {
                 $response = $api->create_block();
@@ -213,7 +226,7 @@ abstract class CCAP_Policy
         if (!is_null($length)) $this->length = length;
         if (!is_null($code_color)) $this->code_color = code_color;
 
-        if ($ctype == 'multiple') {
+        if ($this->captcha_type == 'multiple') {
             // Create the visual CAPTCHA instance in multiple-CAPTCHA block
             $response = $api->create_visual($this->block_id,
                 $this->display_style, $this->include_audio, $this->height,
