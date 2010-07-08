@@ -275,7 +275,9 @@ abstract class CCAP_Policy
             if (is_null($this->block_id))  {
                 $response = $this->api->create_block();
                 if ($response->status == 200) {
-                    $this->block_id = $response->body;
+                    $block_id = $this->on_create_visual_html_success(
+                        'create_block', $response);
+                    $this->block_id = $block_id;
                 } else {
                     return $this->on_create_visual_html_fail('create_block',
                         $response);

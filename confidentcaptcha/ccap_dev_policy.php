@@ -122,7 +122,7 @@ class CCAP_DevelopmentPolicy extends CCAP_Policy
     {
         $method = $response->method;
         $url = $response->url;
-        $form = $response->form;
+        $form = htmlentities($response->form);
         $status = $response->status;
         $body = htmlentities($response->body);
         $from_remote = $response->from_remote;
