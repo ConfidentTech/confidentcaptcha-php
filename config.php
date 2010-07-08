@@ -16,7 +16,7 @@ $api_settings = array(
 //  Confident CAPTCHA, then the relative URL of 'callback.php' will work.
 // If you place the Confident CAPTCHA library files in a different folder,
 //  you'll need a full URL path like '/confident/callback.php'
-$callback_url = 'callback.php';
+$callback_url = 'callback_classy.php';
 
 # Local overrides - used by Confident Technologies for testing.
 if (file_exists('local_config.php')) {

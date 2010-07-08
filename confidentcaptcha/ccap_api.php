@@ -102,15 +102,53 @@ class CCAP_ApiResponse
     var $body;
 
     /**
+     * Request method
+     *
+     * @var string
+     */
+    var $method;
+
+    /**
+     * Request URL
+     *
+     * @var string
+     */
+    var $url;
+
+    /**
+     * Request form parameters, or NULL if not a POST
+     *
+     * @var string
+     */
+    var $form;
+
+    /**
+     * True if response from CAPTCHA API server, false if shortcut used
+     *
+     * @var boolean
+     */
+    var $from_remote;
+
+    /**
      * Construct a CCAP_ApiResponse
      *
      * @param integer $status HTTP status code
      * @param string  $body   HTTP response body
+     * @param string  $method HTTP request method
+     * @param string  $url    Request URL
+     * @param string  $form   Form parameters (or NULL if not a POST)
+     * @param boolean $from_remote TRUE if CAPTCHA API server response, FALSE
+     *  if response is due to a shortcut check
      */
-    public function CCAP_ApiResponse($status, $body)
+    public function __construct($status, $body, $method, $url, $form,
+        $from_remote)
     {
-        $this->$status = $status;
-        $this->$body   = $body;
+        $this->status = $status;
+        $this->body   = $body;
+        $this->method = $method;
+        $this->url    = $url;
+        $this->form   = $form;
+        $this->from_remote = $from_remote;
     }
 }
 
@@ -128,25 +166,25 @@ class CCAP_Api
      * API Customer ID (same for all sites created by your account)
      * @var string
      */
-    protected var $customer_id;
+    protected $customer_id;
 
     /**
      * API Site ID (unique to the a website or even webpage)
      * @var string
      */
-    protected var $site_id;
+    protected $site_id;
 
     /**
      * API Username (secret associated with site)
      * @var string
      */
-    protected var $api_username;
+    protected $api_username;
 
     /**
      * API Password (secret associated with site)
      * @var string
      */
-    protected var $api_password;
+    protected $api_password;
 
     /**
      * Confident CAPTCHA API Server URL
@@ -155,7 +193,18 @@ class CCAP_Api
      * told differently by Confident Technologies technical support.
      * @var string
      */
-    protected var $captcha_server_url;
+    protected $captcha_server_url;
+
+    /**
+     * If True, don't call the server if the response is known
+     *
+     * Many users fail to set their API credentials correctly.  When True,
+     * the library won't bother calling the CAPTCHA API server in some cases,
+     * but instead return the expected failure.  When False, the CAPTCHA API
+     * server is always called.
+     * @var boolean
+     */
+    public $use_shortcuts;
 
     /**
      * Version of this library
@@ -181,7 +230,7 @@ class CCAP_Api
      * 
      * @var string
      */
-    protected var $library_version;
+    protected $library_version;
 
 
     /**
@@ -197,13 +246,14 @@ class CCAP_Api
      * @param string $site_id            API Site ID
      * @param string $api_username       API Username
      * @param string $api_password       API Password
-     * @param string $library_version    This library's version string
      * @param string $captcha_server_url Confident CAPTCHA API Server URL
+     * @param string $library_version    This library's version string
+     * @param boolean $use_shortcuts     True if shortcut mode should be used
      */
-    public function CCAP_Api($customer_id, $site_id, $api_username,
-        $api_password, $library_version = '20100621_PHP_1',
+    public function __construct($customer_id, $site_id, $api_username,
+        $api_password,
         $captcha_server_url = 'http://captcha.confidenttechnologies.com',
-        )
+        $library_version = '20100621_PHP', $use_shortcuts = FALSE)
     {
         $this->customer_id = $customer_id;
         $this->site_id = $site_id;
@@ -211,63 +261,80 @@ class CCAP_Api
         $this->api_password = $api_password;
         $this->library_version = $library_version;
         $this->captcha_server_url = $captcha_server_url;
+        $this->use_shortcuts = $use_shortcuts;
+    }
+
+    /**
+     * Prepare the URL and form parameters for a request
+     *
+     * @param string  $resource        The resource to call
+     * @param string  $method          The HTTP method to use
+     * @param array   $params          The parameters to send
+     * @param boolean $use_credentials Include API credentials in call
+     * @return array with keys 'url' and 'form'
+     */
+    private function prep_req($resource, $method, $params,
+        $use_credentials)
+    {
+        $url = $this->captcha_server_url . $resource;
+
+        if ($params == NULL) {
+            $params = array();
+        }
+        $params["library_version"] = $this->library_version;
+        if ($use_credentials) {
+            $params['customer_id']  = $this->customer_id;
+            $params['site_id']      = $this->site_id;
+            $params['api_password'] = $this->api_password;
+            $params['api_username'] = $this->api_username;
+        }
+
+        $form = NULL;
+        if (strtoupper($method) == 'GET') {
+            $url .= '?' . http_build_query($params);
+        } elseif (strtoupper($method) == 'POST' and $params) {
+            $form = http_build_query($params);
+        }
+        return Array('url'=>$url, 'form'=>$form);
     }
 
     /**
      * Call the Confident CAPTCHA API
      *
      * @param string  $resource        The resource to call
-     * @param string  $method          The HTTP method to use
+     * @param string  $method          The HTTP method to use (POST or GET)
      * @param array   $params          The parameters to send
      * @param boolean $use_credentials Include API credentials in call
      * @return CCAP_ApiResponse  The response
      */
-    protected function call($resource, $method = "POST", $params=null,
-        $use_credentials=True
-        )
+    protected function call($resource, $method, $params, $use_credentials)
     {
-        $url = $this->$captcha_server_url . $resource;
-
-        if ($params == null) {
-            $params = array();
-        }
-        $params["library_version"] = $this->$library_version;
-        if ($use_credentials) {
-            $params['customer_id']  = $customer_id;
-            $params['site_id']      = $site_id;
-            $params['api_password'] = $api_password;
-            $params['api_username'] = $api_username;
-        }
+        $req = $this->prep_req($resource, $method, $params, $use_credentials);
+        $url = $req['url'];
+        $form = $req['form'];
 
         $ch = curl_init();
 
-        if (strtolower($method) == 'post') {
-            curl_setopt($ch, CURLOPT_POST, true);
+        if (strtoupper($method) == 'POST') {
+            curl_setopt($ch, CURLOPT_POST, TRUE);
 
-            if ($params) {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-            }
-        } elseif (strtolower($method) == 'get') {
-            if ($params) {
-                $url .= '?' . http_build_query($params);
+            if ($form) {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $form);
             }
         }
 
         curl_setopt($ch, CURLOPT_URL, $url);
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         $body = curl_exec($ch);
 
-        if ($body === false) {
-            $response = CCAP_ApiResponse(
-                curl_getinfo($ch, CURLINFO_HTTP_CODE),
-                curl_error($ch)
-            );
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($body === FALSE) {
+            $response = new CCAP_ApiResponse($http_code, curl_error($ch),
+                strtoupper($method), $url, $form, TRUE);
         } else {
-            $response = CCAP_ApiResponse(
-                curl_getinfo($ch, CURLINFO_HTTP_CODE),
-                $body
-            );
+            $response = new CCAP_ApiResponse($http_code, $body, 
+                strtoupper($method), $url, $form, TRUE);
         }
 
         curl_close($ch);
@@ -279,6 +346,7 @@ class CCAP_Api
      *
      * These are used by Confident Technologies to build a risk profile for
      * the CAPTCHA user.
+     * @return array The end user's ip_addr and user_agent
      */
     protected function get_user_info()
     {
@@ -306,6 +374,33 @@ class CCAP_Api
     }
 
     /**
+     * Check that API credentials are set
+     *
+     * @return boolean False if credentials are unset, True if set
+     */
+    private function api_credentials_set()
+    {
+        return (!empty($this->customer_id) and
+                !empty($this->site_id) and
+                !empty($this->api_username) and
+                !empty($this->api_password)
+        );
+    }
+
+    /**
+     * Check that visual CAPTCHA settings are good
+     *
+     * @return NULL if good, string if issue
+     */
+    private function check_visual_settings($params)
+    {
+        // TODO: check security level
+        // TODO: check colors
+        // TODO: check display style
+        return NULL;
+    }
+
+    /**
      * Check that API credentials and other settings are valid.
      *
      * @return CCAP_ApiResponse  body is an HTML table describing
@@ -314,15 +409,17 @@ class CCAP_Api
      */
     public function check_credentials()
     {
-        return $this->call('/check_credentials', 'GET');
+        return $this->call('/check_credentials', 'GET', NULL, FALSE);
     }
 
     /**
      * Get API version XML
+     *
+     * @return CCAP_ApiResponse body is API version XML.
      */
     public function version()
     {
-        return $this->call('/version', 'GET', null, false);
+        return $this->call('/version', 'GET', NULL, FALSE);
     }
 
     /**
@@ -336,8 +433,23 @@ class CCAP_Api
      */
     public function create_block()
     {
+        $resource = '/block';
+        $method = 'POST';
         $params = $this->get_user_info();
-        return call('/block', 'POST', $params);
+        $cred = TRUE;
+
+        if ($this->use_shortcuts) {
+            if (!$this->api_credentials_set()) {
+                // If API Credentials are unset, then call will fail w/ 401
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(401,
+                    "<p><b>401 Not Authorized</b>(API credentials unset,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            }
+        }
+
+        return $this->call($resource, $method, $params, $cred);
     }
 
     /**
@@ -363,25 +475,49 @@ class CCAP_Api
         $include_audio=false, $height=3, $width=3, $length=4, 
         $code_color='White')
     {
+        $resource = "/block/$block_id/visual";
+        $method = 'POST';
+
         $params = Array(
             'display_style' => $display_style,
             'include_audio_form' => $include_audio,
         );
 
-        if ($height != null && $height != '') {
+        if ($height != NULL && $height != '') {
             $params['height'] = $height;
         }
-        if ($width != null && $width != '') {
+        if ($width != NULL && $width != '') {
             $params['width'] = $width;
         }
-        if ($length != null && $length != '') {
+        if ($length != NULL && $length != '') {
             $params['captcha_length'] = $length;
         }
-        if ($code_color != null && $code_color != '') {
+        if ($code_color != NULL && $code_color != '') {
             $params['image_code_color'] = $code_color;
         }
 
-        return call("/block/$block_id/visual", 'POST', $params, false);
+        $cred = FALSE;
+
+        if ($this->use_shortcuts) {
+            if (empty($block_id)) {
+                // If block_id is unset, the call will fail with 404
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(404,
+                    "<p><b>404 Not Found</b>(block_id is empty,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            }
+
+            $check = $this->check_visual_settings($params);
+            if (!is_null($check)) {
+                // Visual Settings are bad, will result in 400
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(400, $check, $method, $req['url'],
+                    $req['form'], FALSE);
+            }
+        }
+
+        return $this->call($resource, $method, $params, $cred);
     }
 
     /**
@@ -400,9 +536,35 @@ class CCAP_Api
      */
     public function check_visual($block_id, $visual_id, $code)
     {
+        $resource = "/block/$block_id/visual/$visual_id";
+        $method = 'POST';
         $params = Array('code' => $code);
-        $resource = "/block/$block_id/visual/$visual_id"
-        return call($resource, 'POST', $params, false);
+        $cred = FALSE;
+
+        if ($this->use_shortcuts) {
+            if (empty($block_id)) {
+                // If block_id is unset, the call will fail with 404
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(404,
+                    "<p><b>404 Not Found</b>(block_id is empty,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            } elseif (empty($visual_id)) {
+                // If visual_id is unset, the call will fail with 404
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(404,
+                    "<p><b>404 Not Found</b>(visual_id is empty,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            } elseif (empty($code)) {
+                // If the code is unset, the call will fail with 200, False
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(200,
+                    "False", $method, $req['url'], $req['form'], FALSE);
+            }
+        }
+
+        return $this->call($resource, $method, $params, $cred);
     }
 
     /**
@@ -419,8 +581,30 @@ class CCAP_Api
      */
     public function start_audio($block_id, $phone_number)
     {
+        $resource = "/block/$block_id/audio";
+        $method = 'POST';
         $params = Array('phone_number' => $phone_number);
-        return call("/block/$block_id/audio", 'POST', $params, false);
+        $cred = FALSE;
+
+        if ($this->use_shortcuts) {
+            if (empty($block_id)) {
+                // If block_id is unset, the call will fail with 404
+                $req = $this->prep_req($resource, $method, $params, FALSE);
+                return new CCAP_ApiResponse(404,
+                    "<p><b>404 Not Found</b>(block_id is empty,".
+                    "shortcut used).</p>", $method, $req['url'],
+                    $req['form'], FALSE);
+            } elseif (empty($phone_number)) {
+                // If the phone number is unset, the call will fail with 400
+                $url = $this->prep_req($resource, $method, $params, FALSE);
+                return new CCAP_ApiResponse(400,
+                    "<p><b>404 Not Found</b>(phone_number is empty,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            }
+        }
+
+        return $this->call($resource, $method, $params, $cred);
     }
 
     /**
@@ -433,7 +617,30 @@ class CCAP_Api
      */
     public function check_audio($block_id, $audio_id)
     {
-        return call("/block/$block_id/audio/$audio_id", 'GET', null, false);
+        $resource = "/block/$block_id/audio/$audio_id";
+        $method = 'POST';
+        $params = NULL;
+        $cred = FALSE;
+
+        if ($this->use_shortcuts) {
+            if (empty($block_id)) {
+                // If block_id is unset, the call will fail with 404
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(404,
+                    "<p><b>404 Not Found</b>(block_id is empty,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            } elseif (empty($audio_id)) {
+                // If audio_id is unset, the call will fail with 404
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(404,
+                    "<p><b>404 Not Found</b>(audio_id is empty,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            }
+        }
+
+        return $this->call($resource, $method, $params, $cred);
     }
 
     /**
@@ -462,6 +669,9 @@ class CCAP_Api
         $include_audio=false, $height=3, $width=3, $length=4,
         $code_color='White')
     {
+        $resource = "/captcha";
+        $method = "POST";
+
         $user_info = $this->get_user_info();
         $params = Array(
             'ipaddr' => $user_info['ipaddr'],
@@ -472,11 +682,24 @@ class CCAP_Api
             'captcha_length' => $length,
             'image_code_color' => $code_color,
         );
-        return call("/captcha", 'POST', $params);
+
+        $cred = TRUE;
+
+        if ($this->use_shortcuts) {
+            $check = $this->check_visual_settings($params);
+            if (!is_null($check)) {
+                // Visual Settings are bad, will result in 400
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(400, $check, $method, $req['url'],
+                    $req['form'], FALSE);
+            }
+        }
+
+        return $this->call($resource, $method, $params, $cred);
     }
 
     /**
-     * Check a CAPTCHA instance in a multiple-CAPTCHA block
+     * Check a single CAPTCHA
      *
      * For security, the width, height, and length must define a visual
      * CAPTCHA that has a low probability of randomly guessing.  Some
@@ -495,8 +718,28 @@ class CCAP_Api
      */
     public function check_captcha($captcha_id, $code)
     {
+        $resource = "/captcha/$captcha_id";
+        $method = 'POST';
         $params = Array('code' => $code);
-        return call("/captcha/$captcha_id", 'POST', $params, false);
+        $cred = FALSE;
+
+        if ($this->use_shortcuts) {
+            if (empty($captcha_id)) {
+                // If captcha_id is unset, the call will fail with 404
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(404,
+                    "<p><b>404 Not Found</b>(captcha_id is empty,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            } elseif (empty($code)) {
+                // If the code is unset, the call will fail with 200, False
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(200,
+                    "False", $method, $req['url'], $req['form'], FALSE);
+            }
+        }
+
+        return $this->call($resource, $method, $params, $cred);
     }
 
     /**
@@ -515,8 +758,23 @@ class CCAP_Api
      */
     public function start_onekey($phone_number)
     {
+        $resource = '/onekey';
+        $method = 'POST';
         $params = Array('phone_number' => $phone_number);
-        return call("/onekey", 'POST', $params);
+        $cred = FALSE;
+
+        if ($this->use_shortcuts) {
+            if (empty($phone_number)) {
+                // If the phone number is unset, the call will fail with 400
+                $req = $this->prep_req($resource, $method, $params, FALSE);
+                return new CCAP_ApiResponse(400,
+                    "<p><b>404 Not Found</b>(phone_number is empty,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            }
+        }
+
+        return $this->call($resource, $method, $params, $cred);
     }
 
     /**
@@ -530,7 +788,23 @@ class CCAP_Api
      */
     public function check_onekey($onekey_id)
     {
-        return call("/onekey/$onekey_id", 'POST');
+        $resource = "/onekey/$onekey_id";
+        $method = 'POST';
+        $params = NULL;
+        $cred = FALSE;
+
+        if ($this->use_shortcuts) {
+            if (empty($onekey_id)) {
+                // If onekey_id is unset, the call will fail with 404
+                $req = $this->prep_req($resource, $method, $params, $cred);
+                return new CCAP_ApiResponse(404,
+                    "<p><b>404 Not Found</b>(onekey_id is empty,".
+                    "shortcut used).</p>", $method, $req['url'], $req['form'],
+                    FALSE);
+            }
+        }
+
+        return $this->call($resource, $method, $params, $cred);
     }
 }
 

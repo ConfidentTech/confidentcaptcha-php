@@ -96,7 +96,7 @@ abstract class CCAP_Policy
      * API interface to use for calls
      * @var CCAP_Api
      */
-    protected var $api;
+    public $api = NULL;
 
     /**
      * CAPTCHA type - multiple or single
@@ -109,75 +109,138 @@ abstract class CCAP_Policy
      * Since single CAPTCHA is just a special case of multiple CAPTCHA, it
      * will probably go away in future API versions.
      */
-    protected var $captcha_type = 'multiple';
+    public $captcha_type = 'multiple';
 
     /**
      * Block ID for multiple captcha
      * @var string
      */
-    protected var $block_id = NULL;
+    public $block_id = NULL;
 
     /**
      * Visual CAPTCHA display style ('flyout' or 'lightbox')
      * @var string
      */
-    protected var $display_style = 'flyout';
+    public $display_style = 'flyout';
 
     /**
      * Visual CAPTCHA - include the audio CAPTCHA alternative (if enabled)
      * @var boolean
      */
-    protected var $include_audio = false;
+    public $include_audio = false;
 
     /**
      * Visual CAPTCHA - Height in pictures
      * @var integer
      */
-    protected var $height = 3;
+    public $height = 3;
 
     /**
      * Visual CAPTCHA - Width in pictures
      * @var integer
      */
-    protected var $width = 3;
+    public $width = 3;
 
     /**
      * Visual CAPTCHA - Number of pictures the user has to select
      * @var integer
      */
-    protected var $length = 4;
+    public $length = 4;
 
     /**
      * Visual CAPTCHA - The color of the letter code on pictures
      * @var string
      */
-    protected var $code_color = 'White';
+    public $code_color = 'White';
 
+    /**
+     * Visual CAPTCHA - TRUE if last create_visual_html succeeded
+     * @var boolean
+     */
+    public $visual_creation_succeeded = NULL;
+
+    /**
+     * Audio CAPTCHA - TRUE if last start_audio succeeded
+     * @var boolean
+     */
+    public $audio_creation_succeeded = NULL;
 
     /**
      * Construct a CCAP_Policy
      *
-     * @param CCAP_Api $api      The API interface to use for calls
+     * @param CCAP_Api $api The API interface to use for calls
      */
-    public function CCAP_Policy($api)
+    public function __construct($api)
     {
-        $this->$api = $api;
+        $this->api = $api;
     }
 
     /**
-     * Handle API failures
-     *
-     * @param string local_func_name Name of the CCAP_Policy function that was called
-     * @param array  local_func_args Array of arguments to the CCAP_Policy function
-     * @param string api_func_name Name of the CCAP_Api function that failed
-     * @param CCAP_ApiResponse response The response from {@link CCAP_Api}
-     * @return string HTML to inject into the page
+     * Start a page containing CAPTCHA
+     * @todo Is this a good default?
      */
-    abstract protected function on_api_fail($local_func_name, $local_func_args,
-        $api_func_name, $response);
+    public function start_captcha_page()
+    {
+        if (session_id === "") session_start();
+    }
 
     /**
-     * Create a visual CAPTCHA
+     * Check local and remote configuration
+     *
+     * @return array with keys 'html' (HTML string) and 'passed' (boolean)
+     * @todo Add local config check
+     */
+    public function check_config()
+    {
+        $response = $this->api->check_credentials();
+        if ($response->status == 200) {
+            $html = $response->body;
+            $passed = (false === strstr($html, "api_failed='True'"));
+        } else {
+            $html  = "check_credentials call failed with status code: ";
+            $html .= $response->status.'.';
+            $html .= '<br />response body: <br />'.$response->body;
+            $passed = false;
+        }
+        return array('html' => $html, 'passed' => $passed);
+    }
+
+    /**
+     * Handle failures on create_visual_html function
+     *
+     * Using die() is rude.  All policies should override this function.
+     * See {@link CCAP_ProductionFailClosed} for one quiet solution.
+     *
+     * @param string $api_func_name Name of the CCAP_Api function that failed
+     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
+     * @return string HTML to inject into the page
+     */
+    protected function on_create_visual_html_fail($api_func_name, $response)
+    {
+        $this->visual_creation_succeeded = NULL;
+        $msg = "<p>CAPTCHA creation failed.  Please try again later.</p>";
+        $msg .= "<p>Response: ".$response->status." - ".$response->body."</p>";
+        die($msg);
+        return $msg;
+    }
+
+    /**
+     * Handle success on create_visual_html function
+     *
+     * In most policies, you'll want to handle success by returning the
+     * response body.
+     * @param string $api_func_name Name of the CCAP_Api function that succeeded
+     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
+     * @return string HTML to inject into the page
+     */
+    protected function on_create_visual_html_success($api_func_name, $response)
+    {
+        $this->visual_creation_succeeded = TRUE;
+        return $response->body;
+    }
+
+    /**
+     * Create HTML for a visual CAPTCHA
      *
      * If 'multiple' is chosen (recommended), then a block is created as
      * needed, and the block_id is stored in {@link $block_id}.
@@ -192,7 +255,7 @@ abstract class CCAP_Policy
      *
      * @return string HTML fragment to inject into page
      */
-    public function create_visual($captcha_type=NULL,
+    public function create_visual_html($captcha_type=NULL,
         $display_style=NULL, $include_audio=NULL, $height=NULL, $width=NULL,
         $length=NULL, $code_color=NULL)
     {
@@ -208,12 +271,12 @@ abstract class CCAP_Policy
         if ($this->captcha_type == 'multiple') {
             // Get a block_id if needed
             if (is_null($this->block_id))  {
-                $response = $api->create_block();
+                $response = $this->api->create_block();
                 if ($response->status == 200) {
                     $this->block_id = $response->body;
                 } else {
-                    return $this->on_api_fail('create_visual', func_get_args(),
-                        'create_block', $response);
+                    return $this->on_create_visual_html_fail('create_block',
+                        $response);
                 }
             }
         }
@@ -228,93 +291,213 @@ abstract class CCAP_Policy
 
         if ($this->captcha_type == 'multiple') {
             // Create the visual CAPTCHA instance in multiple-CAPTCHA block
-            $response = $api->create_visual($this->block_id,
+            $response = $this->api->create_visual($this->block_id,
                 $this->display_style, $this->include_audio, $this->height,
                 $this->width, $this->length, $this->code_color);
             if ($response->status != 200) {
-                return $this->on_api_fail('create_visual', func_get_args(),
-                    'create_visual', $response);
+                return $this->on_create_visual_html_fail('create_visual',
+                    $response);
+            } else {
+                return $this->on_create_visual_html_success('create_visual',
+                    $response);
             }
         } else {
             // Create a single visual CAPTCHA
-            $response = $api->create_captcha($this->display_style,
+            $response = $this->api->create_captcha($this->display_style,
                 $this->include_audio, $this->height,
                 $this->width, $this->length, $this->code_color);
             if ($response->status != 200) {
-                return $this->on_api_fail('create_visual', func_get_args(),
-                    'create_captcha', $response);
+                return $this->on_create_visual_html_fail('create_captcha',
+                    $response);
+            } else {
+                return $this->on_create_visual_html_success('create_captcha',
+                    $response);
             }
         }
-
-        // Success
-        return $this->on_create_visual_success($response);
     }
 
     /**
-     * Handle visual CAPTCHA creation success
+     * Check that the CAPTCHA is valid (creation was successful)
      *
-     * Standard action is to return the response body, but other policies
-     * may want to set session state or something else.
+     * @param string $block_id The block ID from the from
+     * @param string $captcha_id The CAPTCHA ID from the form
+     * @param string $code The guessed code from the form
      *
-     * @param CCAP_ApiResponse response The response from {@link CCAP_Api}
-     * @return string HTML to inject into the page
+     * @return string with return HTML if invalid, NULL if valid
      */
-    protected function on_create_visual_success($response)
+    public function check_valid_captcha($block_id, $captcha_id, $code)
     {
-        return $response->body;
+        return NULL;
     }
-}
 
-/**
- * Confident CAPTCHA policy for page development
- *
- * Most web developers start by adding Confident CAPTCHA to an existing page
- * in their development environment.  Configuration and usage errors are more
- * common during this phase.  This policy causes these errors to be noisy, so
- * that a developer can quickly fix issues without resorting to logs.
- *
- * @package confidentcaptcha-php
- */
+    /**
+     * Handle API failures on check function
+     *
+     * In most policies, you'll want to stop form submission by returning FALSE
+     *
+     * @param string $api_func_name Name of the CCAP_Api function that failed
+     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
+     * @return boolean TRUE if form should pass, FALSE if should fail
+     */
+    protected function on_check_fail($api_func_name, $response)
+    {
+        $this->visual_creation_succeeded = NULL;
+        return FALSE;
+    }
 
-class CCAP_DevelopmentPolicy extends CCAP_Policy
-{
+    /**
+     * Handle API success on check function
+     *
+     * In most policies, you'll want to handle success by returning TRUE if
+     *  the response body is the string 'True'.
+     *
+     * @param string api_func_name Name of the CCAP_Api function that succeeded
+     * @param CCAP_ApiResponse response The response from {@link CCAP_Api}
+     * @return boolean TRUE if form should pass, FALSE if should fail
+     */
+    protected function on_check_success($api_func_name, $response)
+    {
+        $this->visual_creation_succeeded = NULL;
+        return ($response->body == 'True');
+    }
 
-}
+    /**
+     * Check CAPTCHA submission
+     *
+     * @param string  $block_id   Block ID from form, (NULL if not included)
+     * @param string  $captcha_id CAPTCHA ID from form
+     * @param string  $code       User's guess from form
+     *
+     * @return boolean true if success, false if failure
+     */
+    public function check($block_id, $captcha_id, $code)
+    {
+        // Check policy's pre-check logic
+        $pre_check = $this->check_valid_captcha($block_id, $captcha_id, $code);
+        if (!is_null($precheck)) {
+            return $precheck;
+        }
 
-/**
- * Confident CAPTCHA policy for production, failures leave page open
- *
- * Occasionally, the call to create a Confident CAPTCHA will fail, due to
- * upstream issues (failed API credentials, maintenance downtime, etc.).
- * For a page like a contact form, it is better that some automated spam gets
- * through instead of blocking all legimate users.
- *
- * When there is an upstream issue, this policy will hide the CAPTCHA, and
- * CAPTCHA confirmation will succeed.  It requires that the server stores
- * the CAPTCHA state in a session variable or some other persistance scheme.
- *
- * @package confidentcaptcha-php
- */
-class CCAP_ProductionFailOpen extends CCAP_Policy
-{
+        // Set the block_id, if any
+        if (!empty($block_id)) {
+            $this->block_id = $block_id;
+        }
 
-}
+        if (is_null($this->block_id))
+        {
+            // empty block_id - assume single CAPTCHA
+            $response = $this->api->check_captcha($captcha_id, $code);
+            if ($response->status == 200) {
+                $result = $this->on_check_success('check_captcha', $response);
+            } else {
+                $result = $this->on_check_fail('check_captcha', $response);
+            }
+        } else {
+            // Assume multiple CAPTCHA
+            $response = $this->api->check_visual($this->block_id, $captcha_id,
+                $code);
+            if ($response->status == 200) {
+                $result = $this->on_check_success('check_visual', $response);
+            } else {
+                $result = $this->on_check_fail('check_visual', $response);
+            }
+        }
+        return $result;
+    }
 
-/**
- * Confident CAPTCHA policy for production, failures leave page closed
- *
- * Occasionally, the call to create a Confident CAPTCHA will fail, due to
- * upstream issues (failed API credentials, maintenance downtime, etc.).
- * For a page like an account signup form, it is better that the page
- * remains closed to all users than to let some automated accounts be
- * created.
- *
- * When there is an upstream issue, this policy will display a message
- * that CAPTCHA creation failed, and to try again later.
- *
- * @package confidentcaptcha-php
- */
-class CCAP_ProductionFailClosed extends CCAP_Policy
-{
+    /**
+     * Handle failures on start_audio function
+     *
+     * @param string $api_func_name Name of the CCAP_Api function that failed
+     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
+     * @return string XML to return
+     */
+    protected function on_start_audio_fail($api_func_name, $response)
+    {
+        $this->audio_creation_succeeded = NULL;
+        $status = $response['status'];
+        $body = $response['body'];
+        return "<?xml version=\"1.0\"?>\n<response><status>$status</status><onekey_id>$body</onekey_id></response>";
+    }
 
+    /**
+     * Handle success on start_audio function
+     *
+     * In most policies, you'll want to handle success by returning the
+     * response body.
+     * @param string $api_func_name Name of the CCAP_Api function that succeeded
+     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
+     * @return string XML to return
+     */
+    protected function on_start_audio_success($api_func_name, $response)
+    {
+        $this->audio_creation_succeeded = TRUE;
+        $status = $response['status'];
+        $body = $response['body'];
+        return "<?xml version=\"1.0\"?>\n<response><status>$status</status><onekey_id>$body</onekey_id></response>";
+    }
+
+    /**
+     * Start an audio CAPTCHA
+     *
+     * If $block_id is set, then it will be used.  Otherwise, it will be a 
+     * single audio CAPTCHA
+     *
+     * @param string  $block_id   Block ID from form, NULL if not included
+     * @param string  $phone_number US phone number with area code
+     * @return string Audio response XML
+     */
+    public function start_audio($phone_number, $captcha_type=NULL,
+        $block_id=NULL)
+    {
+        // Pick CAPTCHA type, preferring multiple
+        if (!is_null($captcha_type)) {
+            if ($captcha_type == 'single') {
+                $this->captcha_type = 'single';
+            } else {
+                $this->captcha_type = 'multiple';
+            }
+        }
+
+        if ($this->captcha_type == 'multiple') {
+            // Did the user pass a block_id?
+            if (!is_null($block_id)) {
+                $this->block_id = $block_id;
+            }
+
+            // Get a block_id if needed
+            if (is_null($this->block_id))  {
+                $response = $this->api->create_block();
+                if ($response->status == 200) {
+                    $this->block_id = $response->body;
+                } else {
+                    return $this->on_start_audio_fail('create_block',
+                        $response);
+                }
+            }
+        }
+
+        if ($this->captcha_type == 'multiple') {
+            // Create the audio CAPTCHA instance in multiple-CAPTCHA block
+            $response = $this->api->start_audio($this->block_id,
+                $phone_number);
+            if ($response->status != 200) {
+                return $this->on_start_audio_fail('start_audio',
+                    $response);
+            } else {
+                return $this->on_start_audio_success('start_audio',
+                    $response);
+            }
+        } else {
+            // Create a single audio CAPTCHA
+            $response = $this->api->start_onekey($phone_number);
+            if ($response->status != 200) {
+                return $this->on_start_audio_fail('start_onekey',
+                    $response);
+            } else {
+                return $this->on_start_audio_success('start_onekey',
+                    $response);
+            }
+        }
+    }
 }
