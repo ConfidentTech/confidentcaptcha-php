@@ -96,6 +96,12 @@ class CCAP_DevelopmentPolicy extends CCAP_Policy
 {
 
     /**
+     * Storage for API debug messages
+     * @var Array
+     */
+    var $api_debug_messages = Array();
+
+    /**
      * Construct a CCAP_DevelopmentPolicy
      *
      * Sets the 'use_shortcuts' boolean, to avoid bugging the CAPTCHA API
@@ -103,52 +109,27 @@ class CCAP_DevelopmentPolicy extends CCAP_Policy
      *
      * @param CCAP_Api $api The API interface to use for calls
      */
-    public function __construct($api)
+    public function __construct($api, $persist)
     {
-        parent::__construct($api);
+        parent::__construct($api, $persist);
         $this->api->use_shortcuts = TRUE;
+        $this->api_debug_level = 2;
     }
 
     /**
-     * Dump debug information onto page
-     *
-     * @param string $policy_func_name Name of the CCAP_Policy member function
-     * @param string $api_func_name Name of the CCAP_Api function
-     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
-     * @param boolean $success TRUE if the call was successful
+     * Handle debug information by dumping to output
      */
-    protected function debug_dump($policy_func_name, $api_func_name,
-        $response, $success)
+    protected function handle_debug($debug)
     {
-        $method = $response->method;
-        $url = $response->url;
-        $form = htmlentities($response->form);
-        $status = $response->status;
-        $body = htmlentities($response->body);
-        $from_remote = $response->from_remote;
-
-        $d_success = ($success ? '(success)' : '(failure)');
-        $d_form = ($form ? 'with form "'.$form."\"<br>\n" : "");
-        $d_shortcut = ($from_remote ? '' : 'shortcut');
-        if ($body) {
-            $d_body = "and return body<br>\n".$body."<br>\n";
-        } else {
-            $d_body = "and NO return body.<br>\n";
-        }
-
-        echo "
-<div style='confidentcaptcha_debug_message'>\n
-<p><b>CONFIDENT CAPTCHA DEBUG:</b><br>\n
-<i>(This appears because you are using CCAP_DevelopmentPolicy.  After you have
-fixed any configuration problems, change to CCAP_Production_FailOpen or
-another policy.)
-</i><br>\n
-Function \"$policy_func_name\" called \"$api_func_name\", which called<br>\n
-HTTP $method $url<br>\n
-$d_form
-with $d_shortcut return code $status $d_success<br>\n
-$d_body
-<b>END CONFIDENT CAPTCHA DEBUG</b></p></div>\n";
+        $debug_html = str_replace("\n", "<br>\n", $debug);
+        $this->api_debug_messages[] = $debug_html;
+    }
+    
+    protected function get_block_id($response)
+    {
+        $this->debug_dump('get_block_id', 'create_block', $response,
+            $response->status == 200);
+        return parent::get_block_id($response);
     }
 
     /**
@@ -190,7 +171,7 @@ $d_body
      */
     protected function on_check_fail($api_func_name, $response)
     {
-        $this->debug_dump('check', $api_func_name, $response, FALSE);
+        $this->debug_dump('check_visual', $api_func_name, $response, FALSE);
         return parent::on_check_fail($api_func_name, $response);
     }
 
@@ -205,7 +186,30 @@ $d_body
      */
     protected function on_check_success($api_func_name, $response)
     {
-        $this->debug_dump('check', $api_func_name, $response, TRUE);
+        $this->debug_dump('check_visual', $api_func_name, $response, TRUE);
         return parent::on_check_success($api_func_name, $response);
+    }
+    
+    /**
+     * Callback for developer policy - add get_debug function
+     */
+    protected function callback_extensions($endpoint, $request)
+    {
+        $content = NULL;
+        $headers = Array();
+        if ($endpoint == 'get_api_debug') {
+            $content = array_shift($this->api_debug_messages);
+            if (is_null($content)) $content = "";
+        } elseif ($endpoint == 'get_policy_dump') {
+            $content = htmlentities(print_r($this, TRUE));
+        } else {
+            $this->api_debug_messages[] = "Unknown callback '$endpoint'";
+        }
+        if (is_null($content)) {
+            $result = NULL;
+        } else {
+            $result = Array($content, $headers);
+        }
+        return $result;
     }
 }

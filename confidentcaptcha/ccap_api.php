@@ -412,7 +412,7 @@ class CCAP_Api
      */
     public function check_credentials()
     {
-        return $this->call('/check_credentials', 'GET', NULL, FALSE);
+        return $this->call('/check_credentials', 'GET', NULL, TRUE);
     }
 
     /**
