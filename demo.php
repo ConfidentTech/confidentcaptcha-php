@@ -1,40 +1,201 @@
 <?php
+
+/**
+ * This is a demonstration of the Confident CAPTCHA library.  To use this
+ * demo, you must sign up for a free account at:
+ *  http://confidenttechnologies.com/purchase/CAPTCHA_signup.php
+ *
+ * The code is a bit complex, indended to be viewed from a browser rather than
+ * read as code.  See 'sample_before.php' and 'sample_after.php' for a
+ * practical example of how to add Confident CAPTCHA to your own forms.  Be
+ * sure to also look for a plugin for your platform, which is even easier.
+ */
+
 require_once ("config.php");
 require_once ("confidentcaptcha/ccap_api.php");
 require_once ("confidentcaptcha/ccap_persist.php");
 
-$ccap_api = new CCAP_API($api_settings['customer_id'],
+// Use configured state as the working API
+$ccap_api_good = new CCAP_API($api_settings['customer_id'],
     $api_settings['site_id'], $api_settings['api_username'],
     $api_settings['api_password'], $api_settings['captcha_server_url']);
+
+// Has the configuration been tested?
+$settings_good = $_REQUEST['ccap_settings_good'];
+if (!$settings_good) {
+    $cred_check = $ccap_api_good->check_credentials();
+    if ($cred_check->status != 200) {
+        $settings_good = FALSE;
+    } else {
+        $settings_good = is_null(stripos($cred_check->body,
+            "api_failed='True'"));
+    }
+}
+
+// Use a working system or a bad one?
+// TODO
+$ccap_api = $ccap_api_good;
 $ccap_persist = new CCAP_Persist_Session();
 
-/* Pick one of the following, or develop your own */
+// Pick the policy
+$policy = $_REQUEST['ccap_policy'];
+$valid_policies = Array('CCAP_ProductionFailOpen',
+    'CCAP_ProductionFailClosed', 'CCAP_DevelopmentPolicy');
+if (empty($policy)) {
+    $policy_text = 'unset, defaults to ';
+} elseif (!in_array($policy, $valid_policies)) {
+    $policy_text .= "\"$policy\" is not valid, defaults to ";
+} else {
+    $policy_text = '';
+}
 
-/* Good policy for initial development
- * Puts status information on the page, makes errors explicit
- */
-require_once("confidentcaptcha/ccap_dev_policy.php");
-$ccap_policy = new CCAP_DevelopmentPolicy($ccap_api, $ccap_persist);
+if ($policy == 'CCAP_ProductionFailOpen') {
+    require_once("confidentcaptcha/ccap_prod_open_policy.php");
+    $ccap_policy = new CCAP_ProductionFailOpen($ccap_api);
+    $policy_text .= "CCAP_ProductionFailOpen - When CAPTCHA creation fails,
+        the form will succeed.  Useful for contact forms, where you want
+        ";
+} elseif ($policy == 'CCAP_ProductionFailClosed') {
+    require_once("confidentcaptcha/ccap_prod_closed_policy.php");
+    $ccap_policy = new CCAP_ProductionFailClosed($ccap_api);
+    $policy_text .= "CCAP_ProductionFailClosed - When CAPTCHA creation fails,
+        the form will fail.  Useful for account creation forms, where you
+        don't want the form to proceed without a CAPTCHA check.";
+} else {
+    require_once("confidentcaptcha/ccap_dev_policy.php");
+    $ccap_policy = new CCAP_DevelopmentPolicy($ccap_api, $ccap_persist);
+    $policy_text .= "CCAP_DevelopmentPolicy - Records all calls made to the
+        CAPTCHA API server.  Useful for initial form development and
+        troubleshooting, but will leak secrets if used in production.";
+}
 
-/* Safe policy for production, on contact form
- * If CAPTCHA creation fails, then the form still works
- */
-// require_once("confidentcaptcha/ccap_prod_open_policy.php");
-// $ccap_policy = new CCAP_ProductionFailOpen($ccap_api);
+// Pick CAPTCHA parameters
+$display_style = $_REQUEST['ccap_display'];
+$include_audio = $_REQUEST['ccap_include_audio'];
+$height = $_REQUEST['ccap_height'];
+$width = $_REQUEST['ccap_width'];
+$length = $_REQUEST['ccap_length'];
+$code_color = $_REQUEST['ccap_code_color'];
 
-/* Safe policy for production, on account registration form 
- * If CAPTCHA creation fails, then the form will not work
- */
-// require_once("confidentcaptcha/ccap_prod_closed_policy.php");
-// $ccap_policy = new CCAP_ProductionFailClosed($ccap_api);
+// Calculate CAPTCHA strength
+function factorial ($x) 
+{
+    if ($x <= 1)
+        return 1;
+    else
+        return ($x * factorial ($x-1));
+}
 
-// Set these to non-NULL try out different CAPTCHAs 
-$display_style = NULL; // 'flyout' or 'lightbox'
-$include_audio = NULL; // true or false, audio CAPTCHA must be enabled for your account
-$height = NULL;        // Height of visual CAPTCHA in pictures
-$width = NULL;         // Width of visual CAPTCHA in pictures
-$length = NULL;        // How many pictures the user must pick (minimum 3)
-$code_color = NULL;    // Color of letter code on pictures (White, Red, Orange, Yellow, Green, Teal, Blue, Indigo, Violet, Gray)
+function captcha_strength($height, $width, $length)
+{
+    $images = $height * $width;
+    if ($length >= $images)
+        return 0;
+    else
+        return factorial($images) / factorial($images - $length);
+}
+
+$used_height = intval($height);
+$used_width = intval($width);
+$used_length = intval($length);
+if (empty($height)) $used_height = 3;
+if (empty($width)) $used_width = 3;
+if (empty($length)) $used_length = 4;
+$strength = captcha_strength($used_height, $used_width, $used_length);
+$strength_text = "1 in $strength chance of a spam bot randomly guessing
+  correctly, based on height, width, length";
+if ($strength < 1000) $strength_text .= ' (must be at least 1 in 1000)';
+
+// Get display names of parameters
+$valid_display_styles = array('lightbox', 'flyout');
+if (empty($display_style)) {
+    $display_style_text = 'unset (defaults to "flyout")';
+} else {
+    $display_style_text = "\"$display_style\"";
+    if (!in_array($display_style, $valid_display_styles)) 
+        $display_style_text .= ' (not valid)';
+}
+
+if (empty($include_audio)) {
+    $include_audio_text = 'unset (defaults to FALSE)';
+} else {
+    $include_audio_text = "$include_audio_text";
+    if (!is_bool($include_audio)) $include_audio_text .= ' (non-boolean, not valid)';
+}
+
+if (empty($height)) {
+    $height_text = 'unset (defaults to 3)';
+} else {
+    $height_text = "$height";
+    if (!is_numeric($height)) {
+        $height_text .= ' (non-integer, not valid)';
+    } elseif ($used_height < 1) {
+        $height_text .= ' (not positive, not valid)';
+    } elseif ($strength < 1000) {
+        $height_text .= ' (CAPTCHA strength < 1000, not valid)';
+    }
+}
+
+if (empty($width)) {
+    $width_text = 'unset (defaults to 3)';
+} else {
+    $width_text = "$width";
+    if (!is_numeric($width)) {
+        $width_text .= ' (non-integer, not valid)';
+    } elseif ($used_width < 1) {
+        $width_text .= ' (not positive, not valid)';
+    } elseif ($strength < 1000) {
+        $width_text .= ' (CAPTCHA strength < 1000, not valid)';
+    }
+}
+
+if (empty($length)) {
+    $length_text = 'unset (defaults to 4)';
+} else {
+    $length_text = "$length";
+    if (!is_numeric($length)) {
+        $length_text .= ' (non-integer, not valid)';
+    } elseif ($used_length < 1) {
+        $length_text .= ' (not positive, not valid)';
+    } elseif ($strength < 1000) {
+        $length_text .= ' (CAPTCHA strength < 1000, not valid)';
+    }
+}
+
+$valid_colors = array('White', 'Red', 'Orange', 'Yellow', 'Green', 'Teal',
+    'Blue', 'Indigo', 'Violet', 'Gray');
+if (empty($code_color)) {
+    $code_color_text = 'unset (defaults to "White")';
+} else {
+    $code_color_text = "\"$code_color\"";
+    if (!in_array($code_color, $valid_colors))
+        $code_color_text .= ' (not valid)';
+}
+
+/* URL query for these settings */
+function url($page = NONE)
+{
+    global $display_style, $include_audio, $height, $width, $length,
+        $code_color, $policy, $settings_good;
+
+    $p = array();
+    $valid_pages = array('multiple', 'single');
+    if (in_array(strtolower($page), $valid_pages))
+        $p['ccap_page'] = strtolower($page);
+
+    if ($settings_good) $p['ccap_settings_good'] = $settings_good;
+    if (!empty($display_style)) $p['ccap_display'] = $display_style;
+    if (!empty($include_audio)) $p['include_audio'] = $include_audio;
+    if (!empty($height)) $p['ccap_height'] = $height;
+    if (!empty($width)) $p['ccap_width'] = $width;
+    if (!empty($length)) $p['ccap_length'] = $length;
+    if (!empty($code_color)) $p['ccap_code_color'] = $code_color;
+    if (!empty($policy)) $p['ccap_policy'] = $policy;
+
+    $url = $_SERVER['SCRIPT_NAME'];
+    if ($p) $url .= '?' . http_build_query($p);
+    return $url;
+}
 
 /* Page Templates */
 
@@ -138,13 +299,29 @@ $error_template = $header_template . <<<TEMPLATE
 </html>
 TEMPLATE;
 
+// Settings list
+$settings_list = <<<SETTINGS
+<ul>
+  <li>Policy: $policy_text</li>
+  <li>Display Style: $display_style_text</li>
+  <li>Include Audio?: $include_audio_text</li>
+  <li>Height: $height_text</li>
+  <li>Width: $width_text</li>
+  <li>Length: $length_text</li>
+  <li>Code Color: $code_color_text</li>
+</ul>
+<p>
+CAPTCHA strength: $strength_text.
+</p>
+SETTINGS;
+
 // CAPTCHA page template
 $captcha_template = $header_template . <<<TEMPLATE
   <p>
-    This is a sample page for the {METHOD} CAPTCHA method of Confident 
-    CAPTCHA. If this were a real page, then this would be part of a form, such 
-    as a sign-up form, a blog comment form, or some other page where you want
-    to prove that the user is human before allowing them access.
+    This is a demo of Confident CAPTCHA. If this were a real page, then this
+    would be part of a form, such as a sign-up form, a blog comment form, or
+    some other page where you want to prove that the user is human before
+    allowing them access.
   </p>
   <p>{WHEN_CHECKED}</p>
   <p>Things to try:</p>
@@ -158,6 +335,10 @@ $captcha_template = $header_template . <<<TEMPLATE
       <input type='submit' name='submit' value='Submit'>
   </form>
   <p>{CHECK_CAPTCHA_TEXT}</p>
+  <p>
+  Settings (<a href="{CONFIG_URL}">go back to change them</a>):
+  </p>
+  $settings_list
   $debug_area
 </body>
 </html>
@@ -171,7 +352,7 @@ function captcha_page($captcha_type, $ccap_policy)
     global $display_style, $include_audio, $height, $width, $length, 
         $code_color;
 
-    $title = ucwords('Confident CAPTCHA - '.$captcha_type.' CAPTCHA Method');
+    $title = ucwords('Confident CAPTCHA Demonstration');
 
     // Peform any setup needed at the start of a page w/ CAPTCHA
     $start_error = $ccap_policy->start_captcha_page();
@@ -202,7 +383,8 @@ function captcha_page($captcha_type, $ccap_policy)
         $check_captcha_text.=", or go back to the
             <a href='sample_classy.php'>config check</a>";
     } else {
-        $check_captcha_text = "Solve the CAPTCHA above, then click Submit.";
+        $check_captcha_text = "Solve the CAPTCHA above, then click Submit.
+            The result will appear here.";
     }
 
     // On both POST and GET, Generate new CAPTCHA HTML
@@ -250,12 +432,76 @@ function captcha_page($captcha_type, $ccap_policy)
         'THINGS_TO_TRY' => $things_to_try,
         'CAPTCHA_JAVASCRIPT' => $captcha_javascript,
         'CAPTCHA_HTML' => $captcha_html,
-        'CHECK_CAPTCHA_TEXT' => $check_captcha_text
+        'CHECK_CAPTCHA_TEXT' => $check_captcha_text,
+        'CONFIG_URL' => url()
     );
     $captcha_page = generate_page($captcha_template, $tags);
 
     return $captcha_page;
 }
+
+// New settings form
+function new_settings_form()
+{
+    global $display_style, $include_audio, $height, $width, $length, 
+        $code_color, $policy;
+    global $valid_policies, $valid_display_styles, $valid_colors;
+
+    $policy_options = '';
+    foreach($valid_policies as $p) {
+        $sel = ($p == $policy) ? 'selected = "selected"' : '';
+        $policy_options .= "\n    <option value=\"$p\" $sel>$p</option>";
+    }
+    $policy_options .= '\n  ';
+    
+    $display_options = '';
+    foreach($valid_display_styles as $d) {
+        $sel = ($d == $display_style) ? 'selected = "selected"' : '';
+        $display_options .= "\n    <option value=\"$d\" $sel>$d</option>";
+    }
+    $display_options .= '\n  ';
+    
+    $ia_selected = ($include_audio) ? 'selected' : '';
+    
+    $color_options = '';
+    foreach($valid_colors as $c) {
+        $sel = ($c == $color_code) ? 'selected = "selected"' : '';
+        $color_options .= "\n    <option value=\"$c\" $sel>$c</option>";
+    }
+    $color_options .= '\n  ';
+    
+    $form = <<<FORM
+<form name="settings" action="$_SERVER[SCRIPT_NAME]" method="get">
+  <input type="hidden" name="ccap_settings_good" value="$settings_good" />
+  <label>Policy:</label>
+  <select name="ccap_policy">$policy_options</select>
+  <br/>
+  <label>Display Type:</label>
+  <select name="ccap_display">$display_options</select>
+  <br/>
+  <label>Include Audio?</label>
+  <input type="checkbox" name="ccap_include_audio" value="1" $ia_selected />
+  <br/>
+  <label>Height:</label>
+  <input type="text" name="ccap_height" value="$height" />
+  <br />
+  <label>Width:</label>
+  <input type="text" name="ccap_width" value="$width" />
+  <br />
+  <label>Length:</label>
+  <input type="text" name="ccap_length" value="$length" />
+  <br />
+  <label>Code Color:</label>
+  <select name="ccap_code_color">$color_options</select>
+  <br/>
+  <input type="submit" value="Submit" />
+</form>
+<p>Or, <a href="$_SERVER[SCRIPT_NAME]">reset to defaults</a></p>
+FORM;
+    return $form;
+}
+
+
 
 // Sample index page template
 $index_template = $header_template . <<<TEMPLATE
@@ -274,6 +520,14 @@ $index_template = $header_template . <<<TEMPLATE
    <li><a href="?captcha_type=single">Single CAPTCHA Method</a> - One CAPTCHA 
        attempt, checked at form submit</li>
  </ul>
+ <p>
+ Current Settings:
+ </p>
+ $settings_list
+ <p>
+ New Settings:
+ </p>
+ {NEW_SETTINGS_FORM}
  $debug_area
 </body>
 </html>
@@ -303,7 +557,8 @@ function index_page($ccap_policy)
         'TITLE'              => 'Welcome to the Confident CAPTCHA Sample Code',
         'HEAD_SCRIPT'        => '',
         'CHECK_CONFIG_HTML'  => $check_config_html,
-        'CHECK_INSTRUCTIONS' => $check_instructions
+        'CHECK_INSTRUCTIONS' => $check_instructions,
+        'NEW_SETTINGS_FORM'  => new_settings_form()
     );
     $index_page = generate_page($index_template, $tags);
     return $index_page;
