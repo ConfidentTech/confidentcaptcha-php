@@ -16,9 +16,12 @@ require_once ("confidentcaptcha/ccap_api.php");
 require_once ("confidentcaptcha/ccap_persist.php");
 
 // Use configured state as the working API
-$ccap_api_good = new CCAP_API($api_settings['customer_id'],
-    $api_settings['site_id'], $api_settings['api_username'],
-    $api_settings['api_password'], $api_settings['captcha_server_url']);
+$ccap_api_good = new CCAP_API(
+    $ccap_api_settings['customer_id'],
+    $ccap_api_settings['site_id'],
+    $ccap_api_settings['api_username'],
+    $ccap_api_settings['api_password'],
+    $ccap_server_url);
 
 // Has the configuration been tested?
 $settings_good = $_REQUEST['ccap_settings_good'];
@@ -43,25 +46,33 @@ $valid_policies = Array('CCAP_ProductionFailOpen',
     'CCAP_ProductionFailClosed', 'CCAP_DevelopmentPolicy');
 if (empty($policy)) {
     $policy_text = 'unset, defaults to ';
+    $used_policy = $ccap_default_policy;
 } elseif (!in_array($policy, $valid_policies)) {
-    $policy_text .= "\"$policy\" is not valid, defaults to ";
+    $policy_text = "\"$policy\" is not valid, defaults to ";
+    $used_policy = $ccap_default_policy;
 } else {
     $policy_text = '';
+    $used_policy = $policy;
 }
 
-if ($policy == 'CCAP_ProductionFailOpen') {
+if (!in_array($used_policy, $valid_policies)) {
+    $policy_text = "\"$used_policy\", but that's not valid either, so using ";
+    $used_policy = $valid_policies[0];
+}
+
+if ($used_policy == 'CCAP_ProductionFailOpen') {
     require_once("confidentcaptcha/ccap_prod_open_policy.php");
-    $ccap_policy = new CCAP_ProductionFailOpen($ccap_api);
+    $ccap_policy = new CCAP_ProductionFailOpen($ccap_api, $ccap_persist);
     $policy_text .= "CCAP_ProductionFailOpen - When CAPTCHA creation fails,
         the form will succeed.  Useful for contact forms, where you want
         ";
-} elseif ($policy == 'CCAP_ProductionFailClosed') {
+} elseif ($used_policy == 'CCAP_ProductionFailClosed') {
     require_once("confidentcaptcha/ccap_prod_closed_policy.php");
-    $ccap_policy = new CCAP_ProductionFailClosed($ccap_api);
+    $ccap_policy = new CCAP_ProductionFailClosed($ccap_api, $ccap_persist);
     $policy_text .= "CCAP_ProductionFailClosed - When CAPTCHA creation fails,
         the form will fail.  Useful for account creation forms, where you
         don't want the form to proceed without a CAPTCHA check.";
-} else {
+} elseif ($used_policy == 'CCAP_DevelopmentPolicy') {
     require_once("confidentcaptcha/ccap_dev_policy.php");
     $ccap_policy = new CCAP_DevelopmentPolicy($ccap_api, $ccap_persist);
     $policy_text .= "CCAP_DevelopmentPolicy - Records all calls made to the
@@ -233,9 +244,14 @@ debug information.
     function confidentcaptcha_get_debug(depth, first_call, method)
     {
         if (depth > 5) { return; }
+        if (!"$ccap_callback_url") {
+            $("#confidentcaptcha_debug ul").append(
+                "<li>ccap_callback_url is not set</li>");
+            return;
+        }
         $.ajax({
             type: 'POST',
-            url: "$callback_url",
+            url: "$ccap_callback_url",
             data: {endpoint: method},
             dataType: 'text',
             success: function(html) {
@@ -347,7 +363,7 @@ TEMPLATE;
 /* Generate the multiple captcha page */
 function captcha_page($captcha_type, $ccap_policy)
 {
-    global $captcha_template, $error_template, $callback_url;
+    global $captcha_template, $error_template, $ccap_callback_url;
 
     global $display_style, $include_audio, $height, $width, $length, 
         $code_color;
@@ -380,8 +396,9 @@ function captcha_page($captcha_type, $ccap_policy)
         } else {
             $check_captcha_text = 'Incorrect.  Try again';
         }
+        $url = url();
         $check_captcha_text.=", or go back to the
-            <a href='sample_classy.php'>config check</a>";
+            <a href=\"$url\">config check</a>";
     } else {
         $check_captcha_text = "Solve the CAPTCHA above, then click Submit.
             The result will appear here.";
@@ -415,7 +432,7 @@ function captcha_page($captcha_type, $ccap_policy)
         $captcha_javascript = "
             <!-- Needed for ConfidentSecure Multiple CAPTCHA -->
             <script type='text/javascript'>
-                var CONFIDENTCAPTCHA_CALLBACK_URL = \"$callback_url\";
+                var CONFIDENTCAPTCHA_CALLBACK_URL = \"$ccap_callback_url\";
                 var CONFIDENTCAPTCHA_INCLUDE_AUDIO = true;
             </script>";
         $when_checked = "
@@ -502,18 +519,15 @@ FORM;
 }
 
 
-
-// Sample index page template
-$index_template = $header_template . <<<TEMPLATE
+// Sample index page template - good config
+$good_index_template = $header_template . <<<TEMPLATE
 <body>
- <p>Welcome to the Confident CAPTCHA PHP sample.  The table below 
-  details if your configuration is supported by Confident CAPTCHA.  Local
-  settings are set in <tt>config.php</tt>, and remote settings come from
-  <a href="http://captcha.confidenttechnologies.com/">captcha.confidenttechnologies.com</a>.
+ <p>
+ Welcome to the Confident CAPTCHA PHP sample. Your
+ <a href="?ccap_config_page=1">configuration</a>
+ is supported by Confident CAPTCHA.
  </p>
- {CHECK_CONFIG_HTML}
- <p>{CHECK_INSTRUCTIONS}</p>
- <p>There are two CAPTCHA configurations available:</p>
+ <p>There are two Confident CAPTCHA types available:</p>
  <ul>
    <li><a href="?captcha_type=multiple">Multiple CAPTCHA Method</a> - Multiple
        CAPTCHA attempts, checked at CAPTCHA completion</li>
@@ -533,13 +547,70 @@ $index_template = $header_template . <<<TEMPLATE
 </html>
 TEMPLATE;
 
+// Sample index page template - bad config
+$bad_index_template = $header_template . <<<TEMPLATE
+<body>
+ <p>Welcome to the Confident CAPTCHA PHP sample</p>
+ <p>
+ Your configuration is NOT supported by Confident CAPTCHA.  Please visit the
+ <a href="?ccap_config_page=1">configuration page</a>, fix any problems, and 
+ return to this page.
+ </p>
+ $debug_area
+</body>
+</html>
+TEMPLATE;
+
 /* Generate the index page */
 function index_page($ccap_policy)
 {
-    global $index_template;
+    global $good_index_template, $bad_index_template, $ccap_callback_url;
     
     $ccap_policy->reset();
-    $check_config_response = $ccap_policy->check_config();
+    $check_config_response = $ccap_policy->check_config($ccap_callback_url);
+    $check_config_html = $check_config_response['html'];
+    $credentials_good = $check_config_response['passed'];
+    if ($credentials_good) {
+        $template = $good_index_template;
+        $new_settings_form = new_settings_form();
+    } else {
+        $template = $bad_index_template;
+        $new_settings_form = '';
+    }
+
+    $tags = array(
+        'TITLE'              => 'Welcome to the Confident CAPTCHA Sample Code',
+        'HEAD_SCRIPT'        => '',
+        'NEW_SETTINGS_FORM'  => $new_settings_form
+    );
+    $index_page = generate_page($template, $tags);
+    return $index_page;
+}
+
+// Configuration page template
+$config_template = $header_template . <<<TEMPLATE
+<body>
+ <p>
+   The tables below describe your configuration and if it is supported by
+   Confident CAPTCHA.  Local configuration is set in <tt>config.php</tt>, and
+   remote configuration comes from
+   <a href="http://captcha.confidenttechnologies.com/">captcha.confidenttechnologies.com</a>.
+ </p>
+ {CHECK_CONFIG_HTML}
+ <p>{CHECK_INSTRUCTIONS}</p>
+ <p><a href="$_SERVER[SCRIPT_NAME]">Return to index</a>.</p>
+ $debug_area
+</body>
+</html>
+TEMPLATE;
+
+/* Generate the configuration page */
+function config_page($ccap_policy)
+{
+    global $config_template, $ccap_callback_url;
+
+    $ccap_policy->reset();
+    $check_config_response = $ccap_policy->check_config($ccap_callback_url);
     $check_config_html = $check_config_response['html'];
     $credentials_good = $check_config_response['passed'];
     if ($credentials_good) {
@@ -554,19 +625,20 @@ function index_page($ccap_policy)
     }
 
     $tags = array(
-        'TITLE'              => 'Welcome to the Confident CAPTCHA Sample Code',
+        'TITLE'              => 'Confident CAPTCHA Configuration',
         'HEAD_SCRIPT'        => '',
         'CHECK_CONFIG_HTML'  => $check_config_html,
-        'CHECK_INSTRUCTIONS' => $check_instructions,
-        'NEW_SETTINGS_FORM'  => new_settings_form()
+        'CHECK_INSTRUCTIONS' => $check_instructions
     );
-    $index_page = generate_page($index_template, $tags);
-    return $index_page;
+    $config_page = generate_page($config_page, $tags);
+    return $config_page;
 }
 
 // Handle the request
 if (isset($_REQUEST['captcha_type'])) {
     $page = captcha_page($_REQUEST['captcha_type'], $ccap_policy);
+} elseif (isset($_REQUEST['ccap_config_page'])) {
+    $page = config_page($ccap_policy);
 } else {
     $page = index_page($ccap_policy);
 }

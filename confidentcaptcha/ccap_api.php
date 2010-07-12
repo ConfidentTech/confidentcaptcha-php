@@ -169,25 +169,25 @@ class CCAP_Api
      * API Customer ID (same for all sites created by your account)
      * @var string
      */
-    protected $customer_id;
+    public $customer_id;
 
     /**
      * API Site ID (unique to the a website or even webpage)
      * @var string
      */
-    protected $site_id;
+    public $site_id;
 
     /**
      * API Username (secret associated with site)
      * @var string
      */
-    protected $api_username;
+    public $api_username;
 
     /**
      * API Password (secret associated with site)
      * @var string
      */
-    protected $api_password;
+    public $api_password;
 
     /**
      * Confident CAPTCHA API Server URL
@@ -196,7 +196,7 @@ class CCAP_Api
      * told differently by Confident Technologies technical support.
      * @var string
      */
-    protected $captcha_server_url;
+    public $captcha_server_url;
 
     /**
      * If True, don't call the server if the response is known

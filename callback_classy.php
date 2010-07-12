@@ -1,33 +1,38 @@
 <?php 
 
+/* Callback resource for Confident CAPTCHA AJAX calls
+ */
+
 require_once("config.php");
 require_once ("confidentcaptcha/ccap_api.php");
 require_once ("confidentcaptcha/ccap_persist.php");
 
-$ccap_api = new CCAP_API($api_settings['customer_id'],
-    $api_settings['site_id'], $api_settings['api_username'],
-    $api_settings['api_password'], $api_settings['captcha_server_url']);
+session_start();
+
+$ccap_api = new CCAP_API(
+    $ccap_api_settings['customer_id'],
+    $ccap_api_settings['site_id'],
+    $ccap_api_settings['api_username'],
+    $ccap_api_settings['api_password'],
+    $ccap_server_url);
 $ccap_persist = new CCAP_Persist_Session();
 
-/* Pick one of the following, or develop your own */
+if (isset($_SESSION['CONFIDENTCAPTCHA_POLICY_NAME'])) {
+    $policy = $_SESSION['CONFIDENTCAPTCHA_POLICY_NAME'];
+} else {
+    $policy = $ccap_default_policy;
+}
 
-/* Good policy for initial development
- * Puts status information on the page, makes errors explicit
- */
-require_once("confidentcaptcha/ccap_dev_policy.php");
-$ccap_policy = new CCAP_DevelopmentPolicy($ccap_api, $ccap_persist);
-
-/* Safe policy for production, on contact form
- * If CAPTCHA creation fails, then the form still works
- */
-// require_once("confidentcaptcha/ccap_prod_open_policy.php");
-// $ccap_policy = new CCAP_ProductionFailOpen($ccap_api, $ccap_persist);
-
-/* Safe policy for production, on account registration form 
- * If CAPTCHA creation fails, then the form will not work
- */
-// require_once("confidentcaptcha/ccap_prod_closed_policy.php");
-// $ccap_policy = new CCAP_ProductionFailClosed($ccap_api, $ccap_persist);
+if ($policy == 'CCAP_ProductionFailOpen') {
+    require_once("confidentcaptcha/ccap_prod_open_policy.php");
+    $ccap_policy = new CCAP_ProductionFailOpen($ccap_api, $ccap_persist);
+} elseif ($policy == 'CCAP_ProductionFailClosed') {
+    require_once("confidentcaptcha/ccap_prod_closed_policy.php");
+    $ccap_policy = new CCAP_ProductionFailClosed($ccap_api, $ccap_persist);
+} elseif ($policy == 'CCAP_DevelopmentPolicy') {
+    require_once("confidentcaptcha/ccap_dev_policy.php");
+    $ccap_policy = new CCAP_DevelopmentPolicy($ccap_api, $ccap_persist);
+}
 
 /* Generate callback response */
 function captcha_callback($ccap_policy)
@@ -42,8 +47,13 @@ function captcha_callback($ccap_policy)
     return $ccap_policy->callback($endpoint, $_REQUEST);
 }
 
-$ret = captcha_callback($ccap_policy);
-$content = $ret[0];
-$headers = $ret[1];
-foreach ($headers as $h) header($h);
-echo $content;
+if ($ccap_policy) {    
+    $ret = captcha_callback($ccap_policy);
+    $content = $ret[0];
+    $headers = $ret[1];
+    foreach ($headers as $h) header($h);
+    echo $content;
+} else {
+    header("HTTP/1.0 500 Server Error");
+    echo 'Policy is not set, and $ccap_default_policy is invalid';
+}

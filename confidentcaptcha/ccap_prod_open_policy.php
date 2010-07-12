@@ -98,48 +98,4 @@ require_once("confidentcaptcha/ccap_policy.php");
  */
 class CCAP_ProductionFailOpen extends CCAP_Policy
 {
-    /**
-     * Handle failures on create_visual_html function by being noisy
-     *
-     * @param string $api_func_name Name of the CCAP_Api function that failed
-     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
-     * @return string HTML to inject into the page
-     */
-    protected function on_create_visual_html_fail($api_func_name,
-        $response);
-
-    /**
-     * Handle success on create_visual_html function by being noisy
-     *
-     * @param string $api_func_name Name of the CCAP_Api function that succeeded
-     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
-     * @return string HTML to inject into the page
-     */
-    protected function on_create_visual_html_success($api_func_name, $response)
-    {
-        return $response->body;
-    }
-
-    /**
-     * Handle API failures on check function by being noisy
-     *
-     * @param string $api_func_name Name of the CCAP_Api function that failed
-     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
-     * @return boolean TRUE if form should pass, FALSE if should fail
-     */
-    protected function on_check_fail($api_func_name, $response);
-
-    /**
-     * Handle API success on check function by being noisy
-     *
-     * In most policies, you'll want to handle success by returning TRUE if
-     *  the response body is the string 'True'.
-     * @param string api_func_name Name of the CCAP_Api function that succeeded
-     * @param CCAP_ApiResponse response The response from {@link CCAP_Api}
-     * @return boolean TRUE if form should pass, FALSE if should fail
-     */
-    protected function on_check_success($api_func_name, $response)
-    {
-        return ($response->body == 'True');
-    }
 }

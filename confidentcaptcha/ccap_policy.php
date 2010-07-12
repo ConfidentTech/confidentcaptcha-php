@@ -196,13 +196,27 @@ abstract class CCAP_Policy
 
     /**
      * Audio CAPTCHA - Authenticated
+     * @var boolean
      */
     public $audio_authenticated = NULL;
     
     /**
      * Audio CAPTCHA - Audio CAPTCHA ID
+     * @var string
      */
     public $audio_id = NULL;
+    
+    /**
+     * Callback - Endpoint for checking callback
+     * @var string
+     */
+    const CALLBACK_CHECK = 'callback_check';
+    
+    /**
+     * Callback - Value returned by endpoint check
+     * @var string
+     */
+    const CALLBACK_OK = 'The callback is working';
 
     /**
      * Construct a CCAP_Policy
@@ -229,19 +243,157 @@ abstract class CCAP_Policy
      * @return array with keys 'html' (HTML string) and 'passed' (boolean)
      * @todo Add local config check
      */
-    public function check_config()
+    public function check_config($callback_url)
     {
+        // Local checks
+        $local_config = array(array("Item", "Value",
+            "Required Value", "Acceptable?"));
+
+        // Check PHP version 5.x
+        $php_version = phpversion();
+        $php_minimum = "5.0.0";
+        if (version_compare($php_version, $php_minimum, '>=')) {
+            $php_supported = 'Yes';
+        } else {
+            $php_supported = 'No';
+        }
+        $local_config[] = array('PHP version', $php_version, 
+            $php_minimum, $php_supported);
+
+        // Check cURL extension
+        if (extension_loaded('curl')) {
+            $curl_version = phpversion('cURL');
+            if (empty($curl_version)) $curl_version = '(installed)';
+            $curl_supported = 'Yes';
+        } else {
+            $curl_version = "(not installed)";
+            $curl_supported = 'No';
+        }
+        $local_config[] = array('cURL extension', $curl_version,
+            '(installed)', $curl_supported);
+        
+        // Check SimpleXML extension
+        if (extension_loaded('SimpleXML')) {
+            $sxml_version = phpversion('SimpleXML');
+            if (empty($curl_version)) $sxml_version = '(installed)';
+            $sxml_supported = 'Yes';
+        } else {
+            $sxml_version = "(not installed)";
+            $sxml_supported = 'No';
+        }
+        $local_config[] = array('SimpleXML extension', $sxml_version,
+            '(installed)', $sxml_supported);
+        
+        // Check CAPTCHA API server URL
+        $not_set = '(NOT SET)';
+        $url = $this->api->captcha_server_url;
+        $expected_url = 'http://captcha.confidenttechnologies.com/';
+        if ($url == $expected_url) {
+            $url_supported = 'Yes';
+        } elseif (empty($url)) {
+            $url = $not_set;
+            $url_supported = 'No';
+        } elseif ((0 == substr_compare($url, 'http', 0, 4)) and
+                  (substr($url, -1) == '/')) {
+            $url_supported = 'Maybe';
+        } else {
+            $url_supported = 'No';
+        }
+        $local_config[] = array('ccap_server_url', $url, $expected_url,
+            $url_supported);
+
+        // Check API parameters
+        $customer_id = $this->api->customer_id;
+        if (empty($customer_id)) {
+            $customer_id = $not_set;
+            $customer_id_ok = 'No';
+        } else {
+            $customer_id_ok = 'Yes';
+        }
+        $local_config[] = array('customer_id', $customer_id, '(some value)',
+            $customer_id_ok);
+
+        $site_id = $this->api->site_id;
+        if (empty($site_id)) {
+            $site_id = $not_set;
+            $site_id_ok = 'No';
+        } else {
+            $site_id_ok = 'Yes';
+        }
+        $local_config[] = array('site_id', $site_id, '(some value)',
+            $site_id_ok);
+
+        $api_username = $this->api->api_username;
+        if (empty($api_username)) {
+            $api_username = $not_set;
+            $api_username_ok = 'No';
+        } else {
+            $api_username_ok = 'Yes';
+        }
+        $local_config[] = array('api_username', $api_username, '(some value)',
+            $api_username_ok);
+
+        $api_password = $this->api->api_password;
+        if (empty($api_password)) {
+            $api_password = $not_set;
+            $api_password_ok = 'No';
+        } else {
+            $api_password_ok = 'Yes';
+        }
+        $local_config[] = array('api_password', $api_password, '(some value)',
+            $api_password_ok);
+
+        if (empty($callback_url)) {
+            $callback_url = $not_set;
+            $callback_ok = 'No';
+        } else {
+            $callback_ok = 'Yes';
+        }
+        $local_config[] = array('callback_url', $callback_url,
+            "(Local URL)", $callback_ok);
+
+        # Make local tables
+        $local = "<h1>Local Configuration</h1>\n";
+        $local .= "<table border=\"1\">\n<tr><th>";
+        $head_row = array_shift($local_config);
+        $local .= implode('</th><th>', $head_row) . "</th></tr>\n";
+        $local_ok = TRUE;
+        foreach($local_config as $row) {
+            $local .= '<tr><td>'.implode('</td><td>', $row)."</td></tr>\n";
+            if ($row[-1] == 'No')
+                $local_ok = FALSE;
+        }
+        $local .= '</table>';
+
+        # Add callback check button
+        # TODO: Use javascript to check
+        $ok = self::CALLBACK_OK;
+        $local .= "<br/>
+            <form name='callback_check' action='$callback_url' method='post'>
+            <input type='hidden' name='endpoint' value='callback_check' />
+            <input type='submit' value='Click to check the callback' />
+        </form>
+        <p>
+        Response to clicking above should be '$ok'.
+        </p>
+        ";
+        $local .= "<br/>\n<h1>Remote Configuration</h1>\n";
+        
+        // Check credentials with API server
         $response = $this->call_api('check_credentials');
         if ($response->status == 200) {
             $html = $response->body;
-            $passed = (false === strstr($html, "api_failed='True'"));
+            $api_passed = (false === strstr($html, "api_failed='True'"));
         } else {
             $html  = "check_credentials call failed with status code: ";
             $html .= $response->status.'.';
             $html .= '<br />response body: <br />'.$response->body;
-            $passed = false;
+            $api_passed = false;
         }
-        $response =  array('html' => $html, 'passed' => $passed);
+        $response =  array(
+            'html' => $local . $html, 
+            'passed' => $local_ok and $api_passed
+        );
         $this->persist->save($this, 'check_config', $response);
         return $response;
     }
@@ -729,6 +881,8 @@ $d_body";
             $check = $this->check_visual($_REQUEST['block_id'],
                 $_REQUEST['captcha_id'], $_REQUEST['code']);
             $content = ($check ? 'true' : 'false');
+        } elseif ($endpoint == self::CALLBACK_CHECK) {
+            $content = self::CALLBACK_OK;
         } else {
             $result = $this->callback_extensions($endpoint, $request);
             if (!$result) {
