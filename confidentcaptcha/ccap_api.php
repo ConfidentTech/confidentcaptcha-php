@@ -724,7 +724,7 @@ class CCAP_Api
         $resource = "/captcha/$captcha_id";
         $method = 'POST';
         $params = Array('code' => $code);
-        $cred = FALSE;
+        $cred = TRUE;
 
         if ($this->use_shortcuts) {
             if (empty($captcha_id)) {
@@ -764,7 +764,7 @@ class CCAP_Api
         $resource = '/onekey';
         $method = 'POST';
         $params = Array('phone_number' => $phone_number);
-        $cred = FALSE;
+        $cred = TRUE;
 
         if ($this->use_shortcuts) {
             if (empty($phone_number)) {
@@ -794,7 +794,7 @@ class CCAP_Api
         $resource = "/onekey/$onekey_id";
         $method = 'POST';
         $params = NULL;
-        $cred = FALSE;
+        $cred = TRUE;
 
         if ($this->use_shortcuts) {
             if (empty($onekey_id)) {
