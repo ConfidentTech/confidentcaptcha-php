@@ -133,6 +133,12 @@ abstract class CCAP_Policy
      * @var string
      */
     public $block_id = NULL;
+    
+    /**
+     * Visual CAPTCHA - No more CAPTCHAs can be created with this block
+     * @var boolean
+     */
+    public $block_done = NULL;
 
     /**
      * Visual CAPTCHA display style ('flyout' or 'lightbox')
@@ -199,7 +205,7 @@ abstract class CCAP_Policy
      * @var string
      */
     public $visual_id = NULL;
-
+    
     /**
      * Audio CAPTCHA - TRUE if last start_audio succeeded
      * @var boolean
@@ -482,6 +488,7 @@ $d_body";
     {
         $this->captcha_type = 'multiple';
         $this->block_id = NULL;
+        $this->block_done = NULL;
         $this->display_style = NULL;
         $this->include_audio = NULL;
         $this->height = NULL;
@@ -505,8 +512,10 @@ $d_body";
         $response = $this->call_api('create_block');
         if ($response->status == 200) {
             $this->block_id = $response->body;
+            $this->block_done = FALSE;
         } else {
             $this->block_id = NULL;
+            $this->block_done = TRUE;
         }
     }
 
@@ -594,7 +603,12 @@ $d_body";
             $vid_len = $end_value_pos - $value_pos - strlen($v) - 1;
             $visual_id = substr($html, $value_pos + strlen($v) + 1, $vid_len);
             $this->visual_id = $visual_id;
+        } elseif ($response->status == 410) {
+            // Too many failures, no more visual CAPTCHAs in block
+            $this->block_done = TRUE;
+            $this->visual_id = NULL;
         } else {
+            // Some other failure - candidate for fail open / closed
             $this->visual_creation_succeeded = FALSE;
             $this->visual_authenticated = FALSE;
             $this->visual_id = NULL;
