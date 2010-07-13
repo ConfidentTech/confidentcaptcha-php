@@ -100,6 +100,12 @@ abstract class CCAP_Persistence
     abstract public function load(&$policy);
 
     /**
+     * Get stored policy name
+     * @return string The policy class name
+     */
+    abstract public function policy_name();
+
+    /**
      * Save the policy state to persistance store
      *
      * @var CCAP_Policy $policy The policy instance to save
@@ -134,6 +140,15 @@ class CCAP_Persist_Null
      */
     public function load(&$policy)
     {
+    }
+    
+    /**
+     * Get stored policy name
+     * @return string The policy class name
+     */
+    public function policy_name()
+    {
+        return NULL;
     }
 
     /**
@@ -172,9 +187,7 @@ class CCAP_Persist_Session
     public function load(&$policy)
     {
         // Start the session if it hasn't been started yet
-        if (!session_id()) {
-            session_start();
-        }
+        if (!session_id()) session_start();
         
         // Load state from session
         $state_key = "CONFIDENTCAPTCHA_POLICY_STATE";
@@ -184,6 +197,23 @@ class CCAP_Persist_Session
                     $policy->$key = $value;
                 }
             }
+        }
+    }
+
+    /**
+     * Get stored policy name
+     * @return string The policy class name
+     */
+    public function policy_name()
+    {
+        // Start the session if it hasn't been started yet
+        if (!session_id()) session_start();
+        
+        $name_key = "CONFIDENTCAPTCHA_POLICY_NAME";
+        if (isset($_SESSION) and isset($_SESSION[$name_key])) {
+            return $_SESSION[$name_key];
+        } else {
+            return NULL;
         }
     }
 
@@ -199,7 +229,12 @@ class CCAP_Persist_Session
 
         // Save state to session
         $state_key = "CONFIDENTCAPTCHA_POLICY_STATE";
+        $name_key = "CONFIDENTCAPTCHA_POLICY_NAME";
         if (isset($_SESSION)) {
+            // Store policy name
+            $_SESSION[$name_key] = get_class($policy);
+            
+            // Store policy
             $vars = get_object_vars($policy);
             $out_vars = Array();
             foreach($vars as $key => $value) {
@@ -217,14 +252,14 @@ class CCAP_Persist_Session
      public function reset(&$policy)
      {
          // Start the session if it hasn't been started yet
-         if (!session_id()) {
-             session_start();
-         }
+         if (!session_id()) session_start();
 
          // Unset state
          $state_key = "CONFIDENTCAPTCHA_POLICY_STATE";
+         $name_key = "CONFIDENTCAPTCHA_POLICY_NAME";
          if (isset($_SESSION)) {
              unset($_SESSION[$state_key]);
+             unset($_SESSION[$name_key]);
          }
      }
 }

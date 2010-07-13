@@ -136,39 +136,51 @@ abstract class CCAP_Policy
 
     /**
      * Visual CAPTCHA display style ('flyout' or 'lightbox')
+     *
+     * If unset, the CAPTCHA API server defaults to 'lightbox'
      * @var string
      */
-    public $display_style = 'flyout';
+    public $display_style = NULL;
 
     /**
      * Visual CAPTCHA - include the audio CAPTCHA alternative (if enabled)
+     *
+     * If unset, the CAPTCHA API server defaults to FALSE
      * @var boolean
      */
-    public $include_audio = false;
+    public $include_audio = NULL;
 
     /**
      * Visual CAPTCHA - Height in pictures
+     *
+     * If unset, the CAPTCHA API server defaults to 3
      * @var integer
      */
-    public $height = 3;
+    public $height = NULL;
 
     /**
      * Visual CAPTCHA - Width in pictures
+     *
+     * If unset, the CAPTCHA API server defaults to 3
      * @var integer
      */
-    public $width = 3;
+    public $width = NULL;
 
     /**
      * Visual CAPTCHA - Number of pictures the user has to select
+     *
+     * If unset, the CAPTCHA API server defaults to 4
      * @var integer
      */
-    public $length = 4;
+    public $length = NULL;
 
     /**
      * Visual CAPTCHA - The color of the letter code on pictures
+     *
+     * If unset, the CAPTCHA API server defaults to 'White'
      * @var string
      */
-    public $code_color = 'White';
+    public $code_color = NULL;
 
     /**
      * Visual CAPTCHA - TRUE if last create_visual_html succeeded
@@ -470,12 +482,12 @@ $d_body";
     {
         $this->captcha_type = 'multiple';
         $this->block_id = NULL;
-        $this->display_style = 'flyout';
-        $this->include_audio = false;
-        $this->height = 3;
-        $this->width = 3;
-        $this->length = 4;
-        $this->code_color = 'White';
+        $this->display_style = NULL;
+        $this->include_audio = NULL;
+        $this->height = NULL;
+        $this->width = NULL;
+        $this->length = NULL;
+        $this->code_color = NULL;
         $this->visual_creation_succeeded = NULL;
         $this->visual_authenticated = NULL;
         $this->visual_id = NULL;

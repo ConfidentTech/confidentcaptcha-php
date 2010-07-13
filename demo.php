@@ -11,9 +11,10 @@
  * sure to also look for a plugin for your platform, which is even easier.
  */
 
-require_once ("config.php");
-require_once ("confidentcaptcha/ccap_api.php");
-require_once ("confidentcaptcha/ccap_persist.php");
+require_once('config.php');
+require_once('confidentcaptcha/ccap_api.php');
+require_once('confidentcaptcha/ccap_persist.php');
+require_once('confidentcaptcha/ccap_policy_factory.php');
 
 // Use configured state as the working API
 $ccap_api_good = new CCAP_API(
@@ -40,6 +41,7 @@ if (!$settings_good) {
 $ccap_api = $ccap_api_good;
 $ccap_persist = new CCAP_Persist_Session();
 
+
 // Pick the policy
 $policy = $_REQUEST['ccap_policy'];
 $valid_policies = Array('CCAP_ProductionFailOpen',
@@ -60,21 +62,18 @@ if (!in_array($used_policy, $valid_policies)) {
     $used_policy = $valid_policies[0];
 }
 
+$ccap_policy = CCAP_PolicyFactory::restore($ccap_persist, $ccap_api,
+    $used_policy);
+
 if ($used_policy == 'CCAP_ProductionFailOpen') {
-    require_once("confidentcaptcha/ccap_prod_open_policy.php");
-    $ccap_policy = new CCAP_ProductionFailOpen($ccap_api, $ccap_persist);
     $policy_text .= "CCAP_ProductionFailOpen - When CAPTCHA creation fails,
         the form will succeed.  Useful for contact forms, where you want
-        ";
+        the form to work even when the CAPTCHA doesn't.";
 } elseif ($used_policy == 'CCAP_ProductionFailClosed') {
-    require_once("confidentcaptcha/ccap_prod_closed_policy.php");
-    $ccap_policy = new CCAP_ProductionFailClosed($ccap_api, $ccap_persist);
     $policy_text .= "CCAP_ProductionFailClosed - When CAPTCHA creation fails,
         the form will fail.  Useful for account creation forms, where you
         don't want the form to proceed without a CAPTCHA check.";
 } elseif ($used_policy == 'CCAP_DevelopmentPolicy') {
-    require_once("confidentcaptcha/ccap_dev_policy.php");
-    $ccap_policy = new CCAP_DevelopmentPolicy($ccap_api, $ccap_persist);
     $policy_text .= "CCAP_DevelopmentPolicy - Records all calls made to the
         CAPTCHA API server.  Useful for initial form development and
         troubleshooting, but will leak secrets if used in production.";

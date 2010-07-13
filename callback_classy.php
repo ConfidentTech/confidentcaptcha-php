@@ -3,9 +3,10 @@
 /* Callback resource for Confident CAPTCHA AJAX calls
  */
 
-require_once("config.php");
-require_once ("confidentcaptcha/ccap_api.php");
-require_once ("confidentcaptcha/ccap_persist.php");
+require_once('config.php');
+require_once('confidentcaptcha/ccap_api.php');
+require_once('confidentcaptcha/ccap_persist.php');
+require_once('confidentcaptcha/ccap_policy_factory.php');
 
 session_start();
 
@@ -16,23 +17,8 @@ $ccap_api = new CCAP_API(
     $ccap_api_settings['api_password'],
     $ccap_server_url);
 $ccap_persist = new CCAP_Persist_Session();
-
-if (isset($_SESSION['CONFIDENTCAPTCHA_POLICY_NAME'])) {
-    $policy = $_SESSION['CONFIDENTCAPTCHA_POLICY_NAME'];
-} else {
-    $policy = $ccap_default_policy;
-}
-
-if ($policy == 'CCAP_ProductionFailOpen') {
-    require_once("confidentcaptcha/ccap_prod_open_policy.php");
-    $ccap_policy = new CCAP_ProductionFailOpen($ccap_api, $ccap_persist);
-} elseif ($policy == 'CCAP_ProductionFailClosed') {
-    require_once("confidentcaptcha/ccap_prod_closed_policy.php");
-    $ccap_policy = new CCAP_ProductionFailClosed($ccap_api, $ccap_persist);
-} elseif ($policy == 'CCAP_DevelopmentPolicy') {
-    require_once("confidentcaptcha/ccap_dev_policy.php");
-    $ccap_policy = new CCAP_DevelopmentPolicy($ccap_api, $ccap_persist);
-}
+$ccap_policy = CCAP_PolicyFactory::restore($ccap_persist, $ccap_api,
+    $ccap_default_policy);
 
 /* Generate callback response */
 function captcha_callback($ccap_policy)
