@@ -31,7 +31,7 @@ if (!$settings_good) {
     if ($cred_check->status != 200) {
         $settings_good = FALSE;
     } else {
-        $settings_good = is_null(stripos($cred_check->body,
+        $settings_good = (FALSE === stripos($cred_check->body,
             "api_failed='True'"));
     }
 }
@@ -183,16 +183,12 @@ if (empty($code_color)) {
 }
 
 /* URL query for these settings */
-function url($page = NONE)
+function url($extra = NONE)
 {
     global $display_style, $include_audio, $height, $width, $length,
         $code_color, $policy, $settings_good;
 
     $p = array();
-    $valid_pages = array('multiple', 'single');
-    if (in_array(strtolower($page), $valid_pages))
-        $p['ccap_page'] = strtolower($page);
-
     if ($settings_good) $p['ccap_settings_good'] = $settings_good;
     if (!empty($display_style)) $p['ccap_display'] = $display_style;
     if (!empty($include_audio)) $p['include_audio'] = $include_audio;
@@ -201,6 +197,8 @@ function url($page = NONE)
     if (!empty($length)) $p['ccap_length'] = $length;
     if (!empty($code_color)) $p['ccap_code_color'] = $code_color;
     if (!empty($policy)) $p['ccap_policy'] = $policy;
+    
+    if (is_array($extra)) $p = array_merge($p, $extra);
 
     $url = $_SERVER['SCRIPT_NAME'];
     if ($p) $url .= '?' . http_build_query($p);
@@ -350,10 +348,12 @@ $captcha_template = $header_template . <<<TEMPLATE
       <input type='submit' name='submit' value='Submit'>
   </form>
   <p>{CHECK_CAPTCHA_TEXT}</p>
+  <!--
   <p>
   Settings (<a href="{CONFIG_URL}">go back to change them</a>):
   </p>
   $settings_list
+  -->
   $debug_area
 </body>
 </html>
@@ -521,17 +521,20 @@ FORM;
 // Sample index page template - good config
 $good_index_template = $header_template . <<<TEMPLATE
 <body>
- <p>
- Welcome to the Confident CAPTCHA PHP sample. Your
- <a href="?ccap_config_page=1">configuration</a>
- is supported by Confident CAPTCHA.
- </p>
- <p>There are two Confident CAPTCHA types available:</p>
- <ul>
-   <li><a href="?captcha_type=multiple">Multiple CAPTCHA Method</a> - Multiple
-       CAPTCHA attempts, checked at CAPTCHA completion</li>
-   <li><a href="?captcha_type=single">Single CAPTCHA Method</a> - One CAPTCHA 
-       attempt, checked at form submit</li>
+  <p>
+  Welcome to the Confident CAPTCHA PHP sample. Your
+  <a href="?ccap_config_page=1">configuration</a>
+  is supported by Confident CAPTCHA.
+  </p>
+  <p>There are two Confident CAPTCHA types available:</p>
+  <ul>
+  <li><a href="{IN_PAGE_URL}">Instant Verification CAPTCHA Method</a> -
+    CAPTCHA is checked on completion, and the user gets multiple chances.
+    This requires a callback resource for the instant verification.
+  </li>
+  <li><a href="{AT_POST_URL}">Delayed Verification CAPTCHA Method</a> -
+    CAPTCHA is checked after form submission, and the user gets one chance.
+  </li>
  </ul>
  <p>
  Current Settings:
@@ -580,7 +583,9 @@ function index_page($ccap_policy)
     $tags = array(
         'TITLE'              => 'Welcome to the Confident CAPTCHA Sample Code',
         'HEAD_SCRIPT'        => '',
-        'NEW_SETTINGS_FORM'  => $new_settings_form
+        'NEW_SETTINGS_FORM'  => $new_settings_form,
+        'IN_PAGE_URL'        => url(array('captcha_type'=>'multiple')),
+        'AT_POST_URL'        => url(array('captcha_type'=>'single'))
     );
     $index_page = generate_page($template, $tags);
     return $index_page;
