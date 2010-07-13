@@ -378,7 +378,7 @@ abstract class CCAP_Policy
         $local_ok = TRUE;
         foreach($local_config as $row) {
             $local .= '<tr><td>'.implode('</td><td>', $row)."</td></tr>\n";
-            if ($row[-1] == 'No')
+            if (end($row) == 'No')
                 $local_ok = FALSE;
         }
         $local .= '</table>';
@@ -614,7 +614,7 @@ $d_body";
             $this->visual_id = NULL;
         }
         
-        $this->persist->save($this, 'create_visual', $result);
+        $this->persist->save($this, 'create_visual', $response);
         return $this->respond_create_visual($response);
     }
     
@@ -690,8 +690,8 @@ $d_body";
             }
         }
         
-        $this->persist->save($this, 'check_visual', $result);
-        return $this->respond_check_visual($result);
+        $this->persist->save($this, 'check_visual', $response);
+        return $this->respond_check_visual($response);
     }
     
     /**

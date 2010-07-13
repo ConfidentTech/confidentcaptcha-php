@@ -16,6 +16,12 @@ require_once('confidentcaptcha/ccap_api.php');
 require_once('confidentcaptcha/ccap_persist.php');
 require_once('confidentcaptcha/ccap_policy_factory.php');
 
+// Get a value from an array, or NULL
+function array_get($a, $key) {
+    if (isset($a) and isset($a[$key])) return $a[$key];
+    else return NULL;
+}
+
 // Use configured state as the working API
 $ccap_api_good = new CCAP_API(
     $ccap_api_settings['customer_id'],
@@ -25,7 +31,7 @@ $ccap_api_good = new CCAP_API(
     $ccap_server_url);
 
 // Has the configuration been tested?
-$settings_good = $_REQUEST['ccap_settings_good'];
+$settings_good = array_get($_REQUEST, 'ccap_settings_good');
 if (!$settings_good) {
     $cred_check = $ccap_api_good->check_credentials();
     if ($cred_check->status != 200) {
@@ -41,9 +47,8 @@ if (!$settings_good) {
 $ccap_api = $ccap_api_good;
 $ccap_persist = new CCAP_Persist_Session();
 
-
 // Pick the policy
-$policy = $_REQUEST['ccap_policy'];
+$policy = array_get($_REQUEST, 'ccap_policy');
 $valid_policies = Array('CCAP_ProductionFailOpen',
     'CCAP_ProductionFailClosed', 'CCAP_DevelopmentPolicy');
 if (empty($policy)) {
@@ -79,13 +84,13 @@ if ($used_policy == 'CCAP_ProductionFailOpen') {
         troubleshooting, but will leak secrets if used in production.";
 }
 
-// Pick CAPTCHA parameters
-$display_style = $_REQUEST['ccap_display'];
-$include_audio = $_REQUEST['ccap_include_audio'];
-$height = $_REQUEST['ccap_height'];
-$width = $_REQUEST['ccap_width'];
-$length = $_REQUEST['ccap_length'];
-$code_color = $_REQUEST['ccap_code_color'];
+// Load CAPTCHA parameters
+$display_style = array_get($_REQUEST, 'ccap_display');
+$include_audio = array_get($_REQUEST, 'ccap_include_audio');
+$height = array_get($_REQUEST, 'ccap_height');
+$width = array_get($_REQUEST, 'ccap_width');
+$length = array_get($_REQUEST, 'ccap_length');
+$code_color = array_get($_REQUEST, 'ccap_code_color');
 
 // Calculate CAPTCHA strength
 function factorial ($x) 
@@ -117,7 +122,7 @@ $strength_text = "1 in $strength chance of a spam bot randomly guessing
 if ($strength < 1000) $strength_text .= ' (must be at least 1 in 1000)';
 
 // Get display names of parameters
-$valid_display_styles = array('lightbox', 'flyout');
+$valid_display_styles = array('flyout', 'lightbox');
 if (empty($display_style)) {
     $display_style_text = 'unset (defaults to "flyout")';
 } else {
@@ -183,7 +188,7 @@ if (empty($code_color)) {
 }
 
 /* URL query for these settings */
-function url($extra = NONE)
+function url($extra = NULL)
 {
     global $display_style, $include_audio, $height, $width, $length,
         $code_color, $policy, $settings_good;
@@ -406,7 +411,8 @@ function captcha_page($captcha_type, $ccap_policy)
     // On both POST and GET, Generate new CAPTCHA HTML
     $ccap_policy->reset();
     $captcha_html = $ccap_policy->create_visual($captcha_type,
-        $display_style, $include_audio, $height, $width, $length, $code_color);
+        $display_style, $include_audio, $height, $width, $length,
+        $code_color);
 
     // Insert the Confident CAPTCHA into page template
     if ($captcha_type == 'single')
@@ -443,7 +449,6 @@ function captcha_page($captcha_type, $ccap_policy)
     $tags = array(
         'TITLE' => $title,
         'HEAD_SCRIPT' => "",
-        'METHOD' => $method,
         'WHEN_CHECKED' => $when_checked,
         'THINGS_TO_TRY' => $things_to_try,
         'CAPTCHA_JAVASCRIPT' => $captcha_javascript,
@@ -460,7 +465,7 @@ function captcha_page($captcha_type, $ccap_policy)
 function new_settings_form()
 {
     global $display_style, $include_audio, $height, $width, $length, 
-        $code_color, $policy;
+        $code_color, $policy, $settings_good;
     global $valid_policies, $valid_display_styles, $valid_colors;
 
     $policy_options = '';
@@ -481,7 +486,7 @@ function new_settings_form()
     
     $color_options = '';
     foreach($valid_colors as $c) {
-        $sel = ($c == $color_code) ? 'selected = "selected"' : '';
+        $sel = ($c == $code_color) ? 'selected = "selected"' : '';
         $color_options .= "\n    <option value=\"$c\" $sel>$c</option>";
     }
     $color_options .= '\n  ';
@@ -634,7 +639,7 @@ function config_page($ccap_policy)
         'CHECK_CONFIG_HTML'  => $check_config_html,
         'CHECK_INSTRUCTIONS' => $check_instructions
     );
-    $config_page = generate_page($config_page, $tags);
+    $config_page = generate_page($config_template, $tags);
     return $config_page;
 }
 

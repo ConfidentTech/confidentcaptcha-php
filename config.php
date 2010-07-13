@@ -11,7 +11,7 @@ $ccap_api_settings = array(
 /* URL of the CAPTCHA API server.  You shouldn't need to modify this, unless
  * you are running your own captcha service.
  */
-$ccap_server_url = 'http://captcha.confidenttechnologies.com';
+$ccap_server_url = 'http://captcha.confidenttechnologies.com/';
 
 /* The path to the callback function, used in the multiple CAPTCHA method.
  *
