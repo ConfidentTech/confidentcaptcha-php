@@ -67,8 +67,8 @@ if (!in_array($used_policy, $valid_policies)) {
     $used_policy = $valid_policies[0];
 }
 
-$ccap_policy = CCAP_PolicyFactory::restore($ccap_persist, $ccap_api,
-    $used_policy);
+$ccap_policy = CCAP_PolicyFactory::create($used_policy, $ccap_api,
+    $ccap_persist);
 
 if ($used_policy == 'CCAP_ProductionFailOpen') {
     $policy_text .= "CCAP_ProductionFailOpen - When CAPTCHA creation fails,
@@ -233,8 +233,8 @@ $debug_area = <<< DEBUG
 Debug messages will appear here if you are using CCAP_DevelopmentPolicy.
 Don't use this debug code in production - it will leak your API credentials.
 </p><p>
-Use the <a href="#confidentcaptcha_actions">links at the bottom</a> to get more
-debug information.
+Use the <a href="#confidentcaptcha_actions">links at the bottom</a> to get
+more debug information.
 </p>
 <ul></ul>
 <a name="confidentcaptcha_actions">Actions:</a>
@@ -468,14 +468,18 @@ function new_settings_form()
         $code_color, $policy, $settings_good;
     global $valid_policies, $valid_display_styles, $valid_colors;
 
-    $policy_options = '';
+    $policy_options = "\n    <option value=\"\"";
+    if (empty($policy)) $policy_options .= 'selected = "selected"';
+    $policy_options .= '>(unset)</option>';
     foreach($valid_policies as $p) {
-        $sel = ($p == $policy) ? 'selected = "selected"' : '';
+        $sel = ($p == $used_policy) ? 'selected = "selected"' : '';
         $policy_options .= "\n    <option value=\"$p\" $sel>$p</option>";
     }
     $policy_options .= '\n  ';
     
-    $display_options = '';
+    $display_options = "\n    <option value=\"\"";
+    if (empty($display_style)) $display_options .= 'selected = "selected"';
+    $display_options .= '>(unset)</option>';
     foreach($valid_display_styles as $d) {
         $sel = ($d == $display_style) ? 'selected = "selected"' : '';
         $display_options .= "\n    <option value=\"$d\" $sel>$d</option>";
@@ -485,6 +489,9 @@ function new_settings_form()
     $ia_selected = ($include_audio) ? 'selected' : '';
     
     $color_options = '';
+    $color_options = "\n    <option value=\"\"";
+    if (empty($code_color)) $color_options .= 'selected = "selected"';
+    $color_options .= '>(unset)</option>';
     foreach($valid_colors as $c) {
         $sel = ($c == $code_color) ? 'selected = "selected"' : '';
         $color_options .= "\n    <option value=\"$c\" $sel>$c</option>";
