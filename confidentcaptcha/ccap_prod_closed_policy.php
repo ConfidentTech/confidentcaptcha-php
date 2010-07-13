@@ -112,6 +112,6 @@ class CCAP_ProductionFailClosed extends CCAP_Policy
     protected function on_create_visual_html_fail($api_func_name, $response)
     {
         $this->visual_creation_succeeded = NULL;
-        return ""
+        return "";
     }
 }
