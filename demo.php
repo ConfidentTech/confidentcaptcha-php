@@ -472,7 +472,7 @@ function new_settings_form()
     if (empty($policy)) $policy_options .= 'selected = "selected"';
     $policy_options .= '>(unset)</option>';
     foreach($valid_policies as $p) {
-        $sel = ($p == $used_policy) ? 'selected = "selected"' : '';
+        $sel = ($p == $policy) ? 'selected = "selected"' : '';
         $policy_options .= "\n    <option value=\"$p\" $sel>$p</option>";
     }
     $policy_options .= '\n  ';
