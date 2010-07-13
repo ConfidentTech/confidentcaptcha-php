@@ -18,8 +18,7 @@ require_once('confidentcaptcha/ccap_policy_factory.php');
 
 // Get a value from an array, or NULL
 function array_get($a, $key) {
-    if (isset($a) and isset($a[$key])) return $a[$key];
-    else return NULL;
+    return (isset($a[$key])) ? $a[$key] : NULL;
 }
 
 // Use configured state as the working API
@@ -389,9 +388,9 @@ function captcha_page($captcha_type, $ccap_policy)
     // If POST, then check last CAPTCHA
     if ($_SERVER['REQUEST_METHOD'] == 'POST')
     {
-        $block_id = $_REQUEST['confidentcaptcha_block_id'];
-        $captcha_id = $_REQUEST['confidentcaptcha_captcha_id'];
-        $code = $_REQUEST['confidentcaptcha_code'];
+        $block_id = array_get($_REQUEST, 'confidentcaptcha_block_id');
+        $captcha_id = array_get($_REQUEST, 'confidentcaptcha_captcha_id');
+        $code = array_get($_REQUEST, 'confidentcaptcha_code');
         $captcha_solved = $ccap_policy->check_visual($block_id, $captcha_id,
             $code);
         // For this sample, just print if successful or not.

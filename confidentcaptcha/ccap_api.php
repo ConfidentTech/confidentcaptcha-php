@@ -674,10 +674,9 @@ class CCAP_Api
     {
         $resource = "/captcha";
         $method = "POST";
-
         $user_info = $this->get_user_info();
         $params = Array(
-            'ipaddr' => $user_info['ipaddr'],
+            'ip_addr' => $user_info['ip_addr'],
             'user_agent' => $user_info['user_agent'],
             'display_style' => $display_style,
             'height' => $height,
@@ -685,7 +684,6 @@ class CCAP_Api
             'captcha_length' => $length,
             'image_code_color' => $code_color,
         );
-
         $cred = TRUE;
 
         if ($this->use_shortcuts) {
