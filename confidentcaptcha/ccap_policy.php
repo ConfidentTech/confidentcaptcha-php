@@ -116,19 +116,6 @@ abstract class CCAP_Policy
     public $persist = NULL;
 
     /**
-     * CAPTCHA type - multiple or single
-     *
-     * With multiple CAPTCHA, JavaScript can give a user instant feedback and
-     * a chance to try again without refreshing the page.  With single CAPTCHA,
-     * checking is always done on form POST, and failure requires a page
-     * refresh.
-     *
-     * Since single CAPTCHA is just a special case of multiple CAPTCHA, it
-     * will probably go away in future API versions.
-     */
-    public $captcha_type = 'multiple';
-
-    /**
      * Block ID for multiple captcha
      * @var string
      */
@@ -486,7 +473,6 @@ $d_body";
      */
     public function reset()
     {
-        $this->captcha_type = 'multiple';
         $this->block_id = NULL;
         $this->block_done = NULL;
         $this->display_style = NULL;
@@ -525,7 +511,8 @@ $d_body";
      * If 'multiple' is chosen (recommended), then a block is created as
      * needed, and the block_id is stored in {@link $block_id}.
      *
-     * @param string  $captcha_type  'multiple' or 'single'
+     * @param string  $callback_url  The callback URL for instant feedback,
+     *    or NULL for delayed feedback.
      * @param string  $display_style 'flyout' or 'lightbox'
      * @param boolean $include_audio Include audio CAPTCHA (if enabled)
      * @param integer $height        Height of visual CAPTCHA in pictures
@@ -535,27 +522,16 @@ $d_body";
      *
      * @return string HTML fragment to inject into page
      */
-    public function create_visual($captcha_type=NULL, $display_style=NULL, 
+    public function create_visual($callback_url=NULL, $display_style=NULL, 
         $include_audio=NULL, $height=NULL, $width=NULL, $length=NULL,
         $code_color=NULL)
     {
-        // Pick CAPTCHA type, preferring multiple
-        if (!is_null($captcha_type)) {
-            if ($captcha_type == 'single') {
-                $this->captcha_type = 'single';
-            } else {
-                $this->captcha_type = 'multiple';
-            }
-        }
-
         // Get a block_id if needed
         $block_failed = FALSE;
-        if ($this->captcha_type == 'multiple') {
+        if (is_null($this->block_id))  {
+            $response = $this->create_block();
             if (is_null($this->block_id))  {
-                $response = $this->create_block();
-                if (is_null($this->block_id))  {
-                    $block_failed = TRUE;
-                }
+                $block_failed = TRUE;
             }
         }
 
@@ -573,14 +549,9 @@ $d_body";
 
         if ($block_failed) {
             // Response is failed response from block creation
-        } elseif ($this->captcha_type == 'multiple') {
-            // Create the visual CAPTCHA instance in multiple-CAPTCHA block
-            $response = $this->call_api('create_visual', $this->block_id,
-                $this->display_style, $this->include_audio, $this->height,
-                $this->width, $this->length, $this->code_color);
         } else {
-            // Create a single visual CAPTCHA
-            $response = $this->call_api('create_captcha', 
+            // Create the visual CAPTCHA instance
+            $response = $this->call_api('create_visual', $this->block_id,
                 $this->display_style, $this->include_audio, $this->height,
                 $this->width, $this->length, $this->code_color);
         }
@@ -590,6 +561,23 @@ $d_body";
             $this->visual_creation_succeeded = TRUE;
             $this->visual_authenticated = NULL;
             
+
+            if ($callback_url)
+            {
+                // HACK: Inject callback URL into code
+                // TODO: Fix API
+                $audio = ($include_audio) ? 'true' : 'false';
+                $response->body = str_replace('jQuery(function(', 
+                  "var CONFIDENTCAPTCHA_CALLBACK_URL = \"$callback_url\";
+                   var CONFIDENTCAPTCHA_INCLUDE_AUDIO = $audio;
+                   jQuery(function(" , $response->body);
+            } else {
+                // HACK: Remove ajax_verify from code
+                // TODO: Fix API
+                $response->body = str_replace('ajax_verify: true,',
+                    'ajax_verify: false,', $response->body);
+            }
+
             // Find visual_id
             // <input name="..._captcha_id" value='theVisualID'
             // Super complex, but no regex
@@ -656,8 +644,7 @@ $d_body";
             {
                 $check_on_server = FALSE;
             }
-            if ($this->captcha_type == 'multiple' and
-                !is_null($this->block_id) and
+            if (!is_null($this->block_id) and
                 ($block_id != $this->block_id))
             {
                 $check_on_server = FALSE;
@@ -669,13 +656,7 @@ $d_body";
             $check_on_server = FALSE;
         }
         
-        if (!$check_on_server) {
-            // Skip calling CAPTCHA API server
-        } elseif (is_null($this->block_id)) {
-            // empty block_id - assume single CAPTCHA
-            $response = $this->call_api('check_captcha', $captcha_id, $code);
-        } else {
-            // Assume multiple CAPTCHA
+        if ($check_on_server) {
             $response = $this->call_api('check_visual', $this->block_id, 
                 $captcha_id, $code);
         }
@@ -712,47 +693,28 @@ $d_body";
      * single audio CAPTCHA
      *
      * @param string  $phone_number US phone number with area code
-     * @param string  $captcha_type 'multiple' or 'single'
-     * @param string  $block_id     Block ID from form, NULL if not included
+     * @param string  $block_id     Block ID from form, or NULL to generate
      * @return string Audio response XML
      */
-    public function start_audio($phone_number, $captcha_type=NULL,
-        $block_id=NULL)
+    public function start_audio($phone_number, $block_id=NULL)
     {
-        // Pick CAPTCHA type, preferring multiple
-        if (!is_null($captcha_type)) {
-            if ($captcha_type == 'single') {
-                $this->captcha_type = 'single';
-            } else {
-                $this->captcha_type = 'multiple';
-            }
-        }
-
         // Get a block_id if needed
         $block_failed = FALSE;
-        if ($this->captcha_type == 'multiple') {
-            if (is_null($this->block_id)) {
-                // Did the user pass a block_id?
-                if (!is_null($block_id)) {
-                    $this->block_id = $block_id;
-                } else {
-                    $response = $this->create_block();
-                    if (is_null($this->block_id))  {
-                        $block_failed = TRUE;
-                    }
+        if (is_null($this->block_id)) {
+            // Did the user pass a block_id?
+            if (!is_null($block_id)) {
+                $this->block_id = $block_id;
+            } else {
+                $response = $this->create_block();
+                if (is_null($this->block_id))  {
+                    $block_failed = TRUE;
                 }
             }
         }
 
-        if ($block_failed) {
-            // Let response from create_block be response
-        } elseif ($this->captcha_type == 'multiple') {
-            // Create the audio CAPTCHA instance in multiple-CAPTCHA block
+        if (!$block_failed) {
             $response = $this->call_api('start_audio', $this->block_id,
                 $phone_number);
-        } else {
-            // Create a single audio CAPTCHA
-            $response = $this->call_api('start_onekey', $phone_number);
         }
         
         // Update the audio state
@@ -788,7 +750,7 @@ $d_body";
     /**
      * Check audio CAPTCHA submission
      *
-     * @param string  $block_id   Block ID from form, (NULL if not included)
+     * @param string  $block_id   Block ID from form
      * @param string  $captcha_id CAPTCHA ID from form
      *
      * @return boolean true if success, false if failure
@@ -807,8 +769,7 @@ $d_body";
             {
                 $check_on_server = FALSE;
             }
-            if ($this->captcha_type == 'multiple' and
-                !is_null($this->block_id) and
+            if (!is_null($this->block_id) and
                 ($block_id != $this->block_id))
             {
                 $check_on_server = FALSE;
@@ -820,13 +781,7 @@ $d_body";
             $check_on_server = FALSE;
         }
         
-        if (!$check_on_server) {
-            // Skip calling CAPTCHA API server
-        } elseif (is_null($this->block_id)) {
-            // empty block_id - assume single CAPTCHA
-            $response = $this->call_api('check_onekey', $captcha_id);
-        } else {
-            // Assume multiple CAPTCHA
+        if ($check_on_server) {
             $response = $this->call_api('check_audio', $this->block_id, 
                 $captcha_id);
         }

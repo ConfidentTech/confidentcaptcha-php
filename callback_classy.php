@@ -29,7 +29,7 @@ function captcha_callback($ccap_policy)
         return "Error starting callback page: $start_error";
     }
     
-    $endpoint = $_REQUEST['endpoint'];
+    $endpoint = (isset($_REQUEST['endpoint'])) ? $_REQUEST['endpoint'] : '';
     return $ccap_policy->callback($endpoint, $_REQUEST);
 }
 

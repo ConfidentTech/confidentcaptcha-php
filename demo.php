@@ -363,8 +363,8 @@ $captcha_template = $header_template . <<<TEMPLATE
 </html>
 TEMPLATE;
 
-/* Generate the multiple captcha page */
-function captcha_page($captcha_type, $ccap_policy)
+/* Generate the captcha page */
+function captcha_page($with_callback, $ccap_policy)
 {
     global $captcha_template, $error_template, $ccap_callback_url;
 
@@ -409,14 +409,35 @@ function captcha_page($captcha_type, $ccap_policy)
 
     // On both POST and GET, Generate new CAPTCHA HTML
     $ccap_policy->reset();
-    $captcha_html = $ccap_policy->create_visual($captcha_type,
+    $callback_url = ($with_callback) ? $ccap_callback_url : NULL;
+    $captcha_html = $ccap_policy->create_visual($callback_url,
         $display_style, $include_audio, $height, $width, $length,
         $code_color);
 
     // Insert the Confident CAPTCHA into page template
-    if ($captcha_type == 'single')
-    {
-        // Single CAPTCHA versions
+    if ($with_callback) {
+        // CAPTCHA with a callback for instant feedback
+        $things_to_try = "
+            <li>Solve the CAPTCHA, then Submit.</li>
+            <li>Fail the CAPTCHA, then Submit.</li>
+            <li>Fail the CAPTCHA, then solve the second CAPTCHA, then Submit.</li>
+            <li>Fail the CAPTCHA three times, then Submit.</li>
+            <li>Submit without attempting the CAPTCHA.</li>";
+        $captcha_javascript = "";
+        /*
+            <!-- Needed for ConfidentSecure Multiple CAPTCHA -->
+            <script type='text/javascript'>
+                var CONFIDENTCAPTCHA_CALLBACK_URL = \"$ccap_callback_url\";
+                var CONFIDENTCAPTCHA_INCLUDE_AUDIO = true;
+            </script>";
+         */
+        $when_checked = "
+            When you solve the CAPTCHA below, it will immediately confirm if
+            the CAPTCHA is correct.  The result will be stored in the 
+            server-side session data store.  When you then submit the form, 
+            this data store will be checked to see what the result was.";
+    } else {
+        // CAPTCHA without a callback
         $things_to_try = "
             <li>Solve the CAPTCHA, then Submit.</li>
             <li>Fail the CAPTCHA, then Submit.</li>
@@ -425,25 +446,6 @@ function captcha_page($captcha_type, $ccap_policy)
         $when_checked = "
             When you solve the CAPTCHA below, nothing will happen until you
             submit the form.  At that point, the CAPTCHA will be checked.";
-    } else {
-        // Multiple CAPTCHA versions
-        $things_to_try = "
-            <li>Solve the CAPTCHA, then Submit.</li>
-            <li>Fail the CAPTCHA, then Submit.</li>
-            <li>Fail the CAPTCHA, then solve the second CAPTCHA, then Submit.</li>
-            <li>Fail the CAPTCHA three times, then Submit.</li>
-            <li>Submit without attempting the CAPTCHA.</li>";
-        $captcha_javascript = "
-            <!-- Needed for ConfidentSecure Multiple CAPTCHA -->
-            <script type='text/javascript'>
-                var CONFIDENTCAPTCHA_CALLBACK_URL = \"$ccap_callback_url\";
-                var CONFIDENTCAPTCHA_INCLUDE_AUDIO = true;
-            </script>";
-        $when_checked = "
-            When you solve the CAPTCHA below, it will immediately confirm if
-            the CAPTCHA is correct.  The result will be stored in the 
-            server-side session data store.  When you then submit the form, 
-            this data store will be checked to see what the result was.";
     }
     $tags = array(
         'TITLE' => $title,
@@ -595,8 +597,8 @@ function index_page($ccap_policy)
         'TITLE'              => 'Welcome to the Confident CAPTCHA Sample Code',
         'HEAD_SCRIPT'        => '',
         'NEW_SETTINGS_FORM'  => $new_settings_form,
-        'IN_PAGE_URL'        => url(array('captcha_type'=>'multiple')),
-        'AT_POST_URL'        => url(array('captcha_type'=>'single'))
+        'IN_PAGE_URL'        => url(array('with_callback'=>'1')),
+        'AT_POST_URL'        => url(array('with_callback'=>'0'))
     );
     $index_page = generate_page($template, $tags);
     return $index_page;
@@ -650,8 +652,8 @@ function config_page($ccap_policy)
 }
 
 // Handle the request
-if (isset($_REQUEST['captcha_type'])) {
-    $page = captcha_page($_REQUEST['captcha_type'], $ccap_policy);
+if (isset($_REQUEST['with_callback'])) {
+    $page = captcha_page(('1' == $_REQUEST['with_callback']), $ccap_policy);
 } elseif (isset($_REQUEST['ccap_config_page'])) {
     $page = config_page($ccap_policy);
 } else {
