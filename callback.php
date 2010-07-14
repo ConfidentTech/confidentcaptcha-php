@@ -16,7 +16,7 @@ $ccap_api = new CCAP_API(
     $ccap_api_settings['api_username'],
     $ccap_api_settings['api_password'],
     $ccap_server_url);
-$ccap_persist = new CCAP_Persist_Session();
+$ccap_persist = new CCAP_PersistSession();
 $ccap_policy = CCAP_PolicyFactory::restore($ccap_persist, $ccap_api,
     $ccap_default_policy);
 

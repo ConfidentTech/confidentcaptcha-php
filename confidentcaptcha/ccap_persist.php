@@ -117,7 +117,7 @@ abstract class CCAP_Persistence
      *
      * @var CCAP_Policy $policy The policy instance to clear
      */
-    abstract public function clear(&$policy);
+    abstract public function reset(&$policy);
 }
 
 /**
@@ -131,7 +131,7 @@ abstract class CCAP_Persistence
  *
  * @package confidentcaptcha-php
  */
-class CCAP_Persist_Null
+class CCAP_PersistNull
 {
     /**
      * Initialize the policy state from persistance store
@@ -165,7 +165,7 @@ class CCAP_Persist_Null
      *
      * @var CCAP_Policy $policy The policy instance to clear
      */
-    public function clear(&$policy)
+    public function reset(&$policy)
     {
     }
 }
@@ -177,7 +177,7 @@ class CCAP_Persist_Null
  *
  * @package confidentcaptcha-php
  */
-class CCAP_Persist_Session
+class CCAP_PersistSession
 {   
     /**
      * Load state from session

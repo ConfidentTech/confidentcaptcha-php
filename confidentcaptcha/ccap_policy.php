@@ -538,13 +538,13 @@ $d_body";
         // Store CAPTCHA creation parameters for future calls
         if (!$block_failed) {
             if (!is_null($display_style)) 
-                $this->display_style = display_style;
+                $this->display_style = $display_style;
             if (!is_null($include_audio)) 
-                $this->include_audio = include_audio;
-            if (!is_null($height)) $this->height = height;
-            if (!is_null($width)) $this->width = width;
-            if (!is_null($length)) $this->length = length;
-            if (!is_null($code_color)) $this->code_color = code_color;
+                $this->include_audio = $include_audio;
+            if (!is_null($height)) $this->height = $height;
+            if (!is_null($width)) $this->width = $width;
+            if (!is_null($length)) $this->length = $length;
+            if (!is_null($code_color)) $this->code_color = $code_color;
         }
 
         if ($block_failed) {

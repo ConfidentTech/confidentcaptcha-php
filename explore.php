@@ -44,7 +44,7 @@ if (!$settings_good) {
 // Use a working system or a bad one?
 // TODO
 $ccap_api = $ccap_api_good;
-$ccap_persist = new CCAP_Persist_Session();
+$ccap_persist = new CCAP_PersistSession();
 
 // Pick the policy
 $policy = array_get($_REQUEST, 'ccap_policy');
@@ -334,6 +334,8 @@ SETTINGS;
 
 // CAPTCHA page template
 $captcha_template = $header_template . <<<TEMPLATE
+<body>
+  <h1>Confident CAPTCHA Demonstration</h1>
   <p>
     This is a demo of Confident CAPTCHA. If this were a real page, then this
     would be part of a form, such as a sign-up form, a blog comment form, or
@@ -345,19 +347,12 @@ $captcha_template = $header_template . <<<TEMPLATE
   <ol>
     {THINGS_TO_TRY}
   </ol>
-  {CAPTCHA_JAVASCRIPT}
   <form method='POST'>
       <!-- Your other form inputs (email, comments, etc.) go here -->
       {CAPTCHA_HTML}
       <input type='submit' name='submit' value='Submit'>
   </form>
   <p>{CHECK_CAPTCHA_TEXT}</p>
-  <!--
-  <p>
-  Settings (<a href="{CONFIG_URL}">go back to change them</a>):
-  </p>
-  $settings_list
-  -->
   $debug_area
 </body>
 </html>
@@ -384,7 +379,7 @@ function captcha_page($with_callback, $ccap_policy)
         $error_page = generate_page($error_template, $tags);
         return $error_page;
     }
-
+    
     // If POST, then check last CAPTCHA
     if ($_SERVER['REQUEST_METHOD'] == 'POST')
     {
@@ -395,17 +390,18 @@ function captcha_page($with_callback, $ccap_policy)
             $code);
         // For this sample, just print if successful or not.
         if ($captcha_solved) {
-            $check_captcha_text = 'Success!  Try another';
+            $check_captcha_text = 'Success!  Try another, or ';
         } else {
-            $check_captcha_text = 'Incorrect.  Try again';
+            $check_captcha_text = 'Incorrect.  Try again, or ';
         }
-        $url = url();
-        $check_captcha_text.=", or go back to the
-            <a href=\"$url\">config check</a>";
     } else {
         $check_captcha_text = "Solve the CAPTCHA above, then click Submit.
-            The result will appear here.";
+            The result will appear here.  Or, you can ";
     }
+    $url = url();
+    $check_captcha_text .= "<a href=\"$url\">go back to the previous page</a>
+        to change the CAPTCHA type or settings.";
+    
 
     // On both POST and GET, Generate new CAPTCHA HTML
     $ccap_policy->reset();
@@ -423,14 +419,6 @@ function captcha_page($with_callback, $ccap_policy)
             <li>Fail the CAPTCHA, then solve the second CAPTCHA, then Submit.</li>
             <li>Fail the CAPTCHA three times, then Submit.</li>
             <li>Submit without attempting the CAPTCHA.</li>";
-        $captcha_javascript = "";
-        /*
-            <!-- Needed for ConfidentSecure Multiple CAPTCHA -->
-            <script type='text/javascript'>
-                var CONFIDENTCAPTCHA_CALLBACK_URL = \"$ccap_callback_url\";
-                var CONFIDENTCAPTCHA_INCLUDE_AUDIO = true;
-            </script>";
-         */
         $when_checked = "
             When you solve the CAPTCHA below, it will immediately confirm if
             the CAPTCHA is correct.  The result will be stored in the 
@@ -442,7 +430,6 @@ function captcha_page($with_callback, $ccap_policy)
             <li>Solve the CAPTCHA, then Submit.</li>
             <li>Fail the CAPTCHA, then Submit.</li>
             <li>Submit without attempting the CAPTCHA.</li>";
-        $captcha_javascript = "";
         $when_checked = "
             When you solve the CAPTCHA below, nothing will happen until you
             submit the form.  At that point, the CAPTCHA will be checked.";
@@ -452,7 +439,6 @@ function captcha_page($with_callback, $ccap_policy)
         'HEAD_SCRIPT' => "",
         'WHEN_CHECKED' => $when_checked,
         'THINGS_TO_TRY' => $things_to_try,
-        'CAPTCHA_JAVASCRIPT' => $captcha_javascript,
         'CAPTCHA_HTML' => $captcha_html,
         'CHECK_CAPTCHA_TEXT' => $check_captcha_text,
         'CONFIG_URL' => url()
@@ -534,11 +520,7 @@ FORM;
 // Sample index page template - good config
 $good_index_template = $header_template . <<<TEMPLATE
 <body>
-  <p>
-  Welcome to the Confident CAPTCHA PHP sample. Your
-  <a href="?ccap_config_page=1">configuration</a>
-  is supported by Confident CAPTCHA.
-  </p>
+  <h1>Confident CAPTCHA Demonstration</h1>
   <p>There are two Confident CAPTCHA types available:</p>
   <ul>
   <li><a href="{IN_PAGE_URL}">Instant Verification CAPTCHA Method</a> -
@@ -549,13 +531,9 @@ $good_index_template = $header_template . <<<TEMPLATE
     CAPTCHA is checked after form submission, and the user gets one chance.
   </li>
  </ul>
- <p>
- Current Settings:
- </p>
+ <h2>Current Settings</h2>
  $settings_list
- <p>
- New Settings:
- </p>
+ <h2>New Settings</h2>
  {NEW_SETTINGS_FORM}
  $debug_area
 </body>
@@ -565,11 +543,10 @@ TEMPLATE;
 // Sample index page template - bad config
 $bad_index_template = $header_template . <<<TEMPLATE
 <body>
- <p>Welcome to the Confident CAPTCHA PHP sample</p>
+ <h1>Confident CAPTCHA Demonstration - Errors Detected</h1>
  <p>
  Your configuration is NOT supported by Confident CAPTCHA.  Please visit the
- <a href="?ccap_config_page=1">configuration page</a>, fix any problems, and 
- return to this page.
+ <a href="check.php">configuration check page</a> and fix any problems.
  </p>
  $debug_area
 </body>
@@ -584,8 +561,8 @@ function index_page($ccap_policy)
     $ccap_policy->reset();
     $check_config_response = $ccap_policy->check_config($ccap_callback_url);
     $check_config_html = $check_config_response['html'];
-    $credentials_good = $check_config_response['passed'];
-    if ($credentials_good) {
+    $config_good = $check_config_response['passed'];
+    if ($config_good) {
         $template = $good_index_template;
         $new_settings_form = new_settings_form();
     } else {
@@ -604,52 +581,6 @@ function index_page($ccap_policy)
     return $index_page;
 }
 
-// Configuration page template
-$config_template = $header_template . <<<TEMPLATE
-<body>
- <p>
-   The tables below describe your configuration and if it is supported by
-   Confident CAPTCHA.  Local configuration is set in <tt>config.php</tt>, and
-   remote configuration comes from
-   <a href="http://captcha.confidenttechnologies.com/">captcha.confidenttechnologies.com</a>.
- </p>
- {CHECK_CONFIG_HTML}
- <p>{CHECK_INSTRUCTIONS}</p>
- <p><a href="$_SERVER[SCRIPT_NAME]">Return to index</a>.</p>
- $debug_area
-</body>
-</html>
-TEMPLATE;
-
-/* Generate the configuration page */
-function config_page($ccap_policy)
-{
-    global $config_template, $ccap_callback_url;
-
-    $ccap_policy->reset();
-    $check_config_response = $ccap_policy->check_config($ccap_callback_url);
-    $check_config_html = $check_config_response['html'];
-    $credentials_good = $check_config_response['passed'];
-    if ($credentials_good) {
-        $check_instructions = "Your configuration is supported by the 
-            Confident CAPTCHA PHP sample code. Use this <tt>config.php</tt> in
-            your own project.";
-    } else {
-        $check_instructions = "<b>Your configuration is <i>not</i> supported
-            by the Confident CAPTCHA PHP sample code</b>.  Please fix the 
-            errors before trying the samples and integrating into your own 
-            project.";
-    }
-
-    $tags = array(
-        'TITLE'              => 'Confident CAPTCHA Configuration',
-        'HEAD_SCRIPT'        => '',
-        'CHECK_CONFIG_HTML'  => $check_config_html,
-        'CHECK_INSTRUCTIONS' => $check_instructions
-    );
-    $config_page = generate_page($config_template, $tags);
-    return $config_page;
-}
 
 // Handle the request
 if (isset($_REQUEST['with_callback'])) {
