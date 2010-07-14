@@ -1,22 +1,5 @@
 <?php
 
-/**
- * This is a demonstration of the Confident CAPTCHA library.  To use this
- * demo, you must sign up for a free account at:
- *  http://confidenttechnologies.com/purchase/CAPTCHA_signup.php
- *
- * The code is a bit complex, indended to be viewed from a browser rather than
- * read as code.  See 'sample_before.php' and 'sample_after.php' for a
- * practical example of how to add Confident CAPTCHA to your own forms.  Be
- * sure to also look for a plugin for your platform, which is even easier.
- */
-
-require_once('config.php');
-require_once('confidentcaptcha/ccap_api.php');
-require_once('confidentcaptcha/ccap_persist.php');
-require_once('confidentcaptcha/ccap_policy_factory.php');
-
-
 /* Enter your login.confidenttechnologies.com account information here */
 $ccap_api_settings = array(
     'customer_id' => '',

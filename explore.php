@@ -521,6 +521,7 @@ FORM;
 $good_index_template = $header_template . <<<TEMPLATE
 <body>
   <h1>Confident CAPTCHA Demonstration</h1>
+  <p>(<a href="index.php">Return to the index</a>)</p>
   <p>There are two Confident CAPTCHA types available:</p>
   <ul>
   <li><a href="{IN_PAGE_URL}">Instant Verification CAPTCHA Method</a> -
