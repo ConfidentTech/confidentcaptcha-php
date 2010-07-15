@@ -98,4 +98,12 @@ require_once("confidentcaptcha/ccap_policy.php");
  */
 class CCAP_ProductionFailOpen extends CCAP_Policy
 {
+    /**
+     * Respond with success if captcha creation failed
+     */
+    protected function respond_check_visual($response)
+    {
+        return ($this->visual_authenticated === TRUE or
+                $this->visual_creation_succeeded === FALSE);
+    }
 }

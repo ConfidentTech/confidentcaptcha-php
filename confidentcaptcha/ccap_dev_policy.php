@@ -136,7 +136,7 @@ class CCAP_DevelopmentPolicy extends CCAP_Policy
             $content = array_shift($this->api_debug_messages);
             if (is_null($content)) $content = "";
         } elseif ($endpoint == 'get_policy_dump') {
-            $content = htmlentities(print_r($this, TRUE));
+            $content = htmlentities(var_export($this, TRUE));
         } else {
             $this->api_debug_messages[] = "Unknown callback '$endpoint'";
         }

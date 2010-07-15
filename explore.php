@@ -42,8 +42,67 @@ if (!$settings_good) {
 }
 
 // Use a working system or a bad one?
-// TODO
-$ccap_api = $ccap_api_good;
+$fail_sim = array_get($_REQUEST, 'ccap_fail_sim');
+$valid_fail_sims = Array('bad_credentials', 'server_not_responding');
+if (empty($fail_sim)) {
+    $fail_sim_text = 'No failure simulated.';
+} elseif (!in_array($fail_sim, $valid_fail_sims)) {
+    $fail_sim = NULL;
+    $fail_sim_text = "\"$fail_sim\" is not valid, defaults to no failure.";
+} else {
+    $fail_sim_text = ucfirst(str_replace('_', ' ', $fail_sim));
+}
+
+if (empty($fail_sim)) {
+    // Use good API
+    $ccap_api = $ccap_api_good;
+} elseif ($fail_sim == 'bad_credentials') {
+    class CCAP_Api401 extends CCAP_Api {
+        protected function call($resource, $method, $params, 
+            $use_credentials)
+        {
+            if ($use_credentials) {
+                $req = $this->prep_req($resource, $method, $params, TRUE);
+                $url = $req['url'];
+                $form = $req['form'];
+                $response = new CCAP_ApiResponse(401, 'Not Authorized (Fake)',
+                    strtoupper($method), $url, $form, FALSE);
+            } else {
+                $response = parent::call($resource, $method, $params, TRUE);
+            }
+            return $response;
+        }
+    }
+    $ccap_api = new CCAP_Api401(
+        $ccap_api_settings['customer_id'],
+        $ccap_api_settings['site_id'],
+        $ccap_api_settings['api_username'],
+        $ccap_api_settings['api_password'],
+        $ccap_server_url);
+} elseif ($fail_sim == 'server_not_responding') {
+    class CCAP_ApiDead extends CCAP_Api {
+        protected function call($resource, $method, $params, 
+            $use_credentials)
+        {
+            $req = $this->prep_req($resource, $method, $params, 
+                $use_credentials);
+            $url = $req['url'];
+            $form = $req['form'];
+            $response = new CCAP_ApiResponse(0,
+                'Server not responding (fake)', strtoupper($method), $url,
+                $form, FALSE);
+            return $response;
+        }
+    }
+    $ccap_api = new CCAP_ApiDead(
+        $ccap_api_settings['customer_id'],
+        $ccap_api_settings['site_id'],
+        $ccap_api_settings['api_username'],
+        $ccap_api_settings['api_password'],
+        $ccap_server_url);
+}
+
+// TODO: Different persistence methods?
 $ccap_persist = new CCAP_PersistSession();
 
 // Pick the policy
@@ -190,7 +249,7 @@ if (empty($code_color)) {
 function url($extra = NULL)
 {
     global $display_style, $include_audio, $height, $width, $length,
-        $code_color, $policy, $settings_good;
+        $code_color, $policy, $settings_good, $fail_sim;
 
     $p = array();
     if ($settings_good) $p['ccap_settings_good'] = $settings_good;
@@ -201,6 +260,7 @@ function url($extra = NULL)
     if (!empty($length)) $p['ccap_length'] = $length;
     if (!empty($code_color)) $p['ccap_code_color'] = $code_color;
     if (!empty($policy)) $p['ccap_policy'] = $policy;
+    if (!empty($fail_sim)) $p['ccap_fail_sim'] = $fail_sim;
     
     if (is_array($extra)) $p = array_merge($p, $extra);
 
@@ -320,6 +380,7 @@ TEMPLATE;
 $settings_list = <<<SETTINGS
 <ul>
   <li>Policy: $policy_text</li>
+  <li>Simulated Failure: $fail_sim_text</li>
   <li>Display Style: $display_style_text</li>
   <li>Include Audio?: $include_audio_text</li>
   <li>Height: $height_text</li>
@@ -448,8 +509,9 @@ function captcha_page($with_callback, $ccap_policy)
 function new_settings_form()
 {
     global $display_style, $include_audio, $height, $width, $length, 
-        $code_color, $policy, $settings_good;
-    global $valid_policies, $valid_display_styles, $valid_colors;
+        $code_color, $policy, $settings_good, $fail_sim,
+        $valid_policies, $valid_display_styles, $valid_colors, 
+        $valid_fail_sims;
 
     $policy_options = "\n    <option value=\"\"";
     if (empty($policy)) $policy_options .= 'selected = "selected"';
@@ -459,6 +521,16 @@ function new_settings_form()
         $policy_options .= "\n    <option value=\"$p\" $sel>$p</option>";
     }
     $policy_options .= '\n  ';
+    
+    $fail_options = "\n    <option value=\"\"";
+    if (empty($fail_sim)) $fail_options .= 'selected = "selected"';
+    $fail_options .= '>(unset)</option>';
+    foreach($valid_fail_sims as $f) {
+        $sel = ($f == $fail_sim) ? 'selected = "selected"' : '';
+        $name = ucfirst(str_replace('_', ' ', $f));
+        $fail_options .= "\n    <option value=\"$f\" $sel>$name</option>";
+    }
+    $fail_options .= '\n  ';
     
     $display_options = "\n    <option value=\"\"";
     if (empty($display_style)) $display_options .= 'selected = "selected"';
@@ -486,6 +558,9 @@ function new_settings_form()
   <input type="hidden" name="ccap_settings_good" value="$settings_good" />
   <label>Policy:</label>
   <select name="ccap_policy">$policy_options</select>
+  <br/>
+  <label>Failure Simulation:</label>
+  <select name="ccap_fail_sim">$fail_options</select>
   <br/>
   <label>Display Type:</label>
   <select name="ccap_display">$display_options</select>
@@ -530,6 +605,7 @@ $good_index_template = $header_template . <<<TEMPLATE
  </ul>
  <h2>Current Settings</h2>
  $settings_list
+ {FAIL_MESSAGE}
  <h2>New Settings</h2>
  {NEW_SETTINGS_FORM}
  $debug_area
@@ -553,12 +629,39 @@ TEMPLATE;
 /* Generate the index page */
 function index_page($ccap_policy)
 {
-    global $good_index_template, $bad_index_template, $ccap_callback_url;
+    global $good_index_template, $bad_index_template, $ccap_callback_url,
+        $fail_sim, $ccap_api_good;
     
     $ccap_policy->reset();
     $check_config_response = $ccap_policy->check_config($ccap_callback_url);
-    $check_config_html = $check_config_response['html'];
     $config_good = $check_config_response['passed'];
+    
+    $fail_message = '';
+    if (!$config_good and $fail_sim) {
+        // If the config only bad because of failure simulation?
+        
+        // Save API
+        $check_config_html = $check_config_response['html'];
+        $bad_api = $ccap_policy->api;
+        
+        // Try with good credentials
+        $ccap_policy->api = $ccap_api_good;
+        $check_config_response = 
+            $ccap_policy->check_config($ccap_callback_url);
+        $config_good = $check_config_response['passed'];
+        
+        // Switch back
+        $ccap_policy->api = $bad_api;
+        
+        if ($config_good) {
+            $fail_message = "
+                <h2>Failed Configuration</h2>
+                <p>The simulated failure is causing the configuraton check to
+                fail.  The failed configuration is:</p>"
+                 . str_replace("h1>", "h3>", $check_config_html);
+        }
+    }
+    
     if ($config_good) {
         $template = $good_index_template;
         $new_settings_form = new_settings_form();
@@ -572,7 +675,8 @@ function index_page($ccap_policy)
         'HEAD_SCRIPT'        => '',
         'NEW_SETTINGS_FORM'  => $new_settings_form,
         'IN_PAGE_URL'        => url(array('with_callback'=>'1')),
-        'AT_POST_URL'        => url(array('with_callback'=>'0'))
+        'AT_POST_URL'        => url(array('with_callback'=>'0')),
+        'FAIL_MESSAGE'       => $fail_message
     );
     $index_page = generate_page($template, $tags);
     return $index_page;

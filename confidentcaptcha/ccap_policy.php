@@ -510,6 +510,7 @@ $d_body";
             $this->block_id = NULL;
             $this->block_done = TRUE;
         }
+        return $response;
     }
 
     /**
@@ -542,8 +543,8 @@ $d_body";
             }
         }
 
-        // Store CAPTCHA creation parameters for future calls
         if (!$block_failed) {
+            // Store CAPTCHA creation parameters for future calls
             if (!is_null($display_style)) 
                 $this->display_style = $display_style;
             if (!is_null($include_audio)) 
@@ -553,12 +554,8 @@ $d_body";
             if (!is_null($length)) $this->length = $length;
             if (!is_null($code_color)) $this->code_color = $code_color;
             if (!is_null($callback_url)) $this->callback_url = $callback_url;
-        }
-
-        if ($block_failed) {
-            // Response is failed response from block creation
-        } else {
-            // Create the visual CAPTCHA instance
+        
+            // Create the visual CAPTCHA
             $response = $this->call_api('create_visual', $this->block_id,
                 $this->display_style, $this->include_audio, $this->height,
                 $this->width, $this->length, $this->code_color);

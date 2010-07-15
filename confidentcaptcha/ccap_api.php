@@ -276,7 +276,7 @@ class CCAP_Api
      * @param boolean $use_credentials Include API credentials in call
      * @return array with keys 'url' and 'form'
      */
-    private function prep_req($resource, $method, $params,
+    protected function prep_req($resource, $method, $params,
         $use_credentials)
     {
         $url = $this->captcha_server_url . $resource;

@@ -99,19 +99,4 @@ require_once("confidentcaptcha/ccap_policy.php");
  */
 class CCAP_ProductionFailClosed extends CCAP_Policy
 {
-    /**
-     * Handle failures on create_visual_html function by dying
-     *
-     * It is assumed that the caller is paying attention to
-     * {@link $creation_succeeded} after a call.
-     *
-     * @param string $api_func_name Name of the CCAP_Api function that failed
-     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
-     * @return string HTML to inject into the page
-     */
-    protected function on_create_visual_html_fail($api_func_name, $response)
-    {
-        $this->visual_creation_succeeded = NULL;
-        return "";
-    }
 }
