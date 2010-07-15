@@ -99,4 +99,26 @@ require_once("confidentcaptcha/ccap_policy.php");
  */
 class CCAP_ProductionFailClosed extends CCAP_Policy
 {
+    /**
+     * On creation failure, tell the user that the form is broken
+     *
+     * It is better for the site owner to examine $visual_creation_succeeded,
+     * and display an error message instead of the form.  This is a backup,
+     * in case the site owner is quickly switching and doesn't have time to
+     * change the page logic cleanly.
+     *
+     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
+     * @return string HTML to inject into the page
+     */
+    protected function respond_create_visual($response)
+    {
+        if ($response->status == 200) {
+            return $response->body;
+        } elseif (!$this->visual_creation_succeeded) {
+            return "<p>CAPTCHA creation failed.  Please try again later.</p>";
+        } else {
+            return "";
+        }
+    }
+    
 }
