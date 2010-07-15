@@ -212,6 +212,12 @@ abstract class CCAP_Policy
     public $audio_id = NULL;
     
     /**
+     * Callback URL
+     * @var string
+     */
+    public $callback_url = NULL;
+    
+    /**
      * Callback - Endpoint for checking callback
      * @var string
      */
@@ -487,6 +493,7 @@ $d_body";
         $this->audio_creation_succeeded = NULL;
         $this->audio_authenticated = NULL;
         $this->audio_id = NULL;
+        $this->callback_url = NULL;
         $this->persist->reset($this);
     }
 
@@ -545,6 +552,7 @@ $d_body";
             if (!is_null($width)) $this->width = $width;
             if (!is_null($length)) $this->length = $length;
             if (!is_null($code_color)) $this->code_color = $code_color;
+            if (!is_null($callback_url)) $this->callback_url = $callback_url;
         }
 
         if ($block_failed) {
@@ -560,15 +568,14 @@ $d_body";
         if ($response->status == 200) {
             $this->visual_creation_succeeded = TRUE;
             $this->visual_authenticated = NULL;
-            
 
-            if ($callback_url)
+            if ($this->callback_url)
             {
                 // HACK: Inject callback URL into code
                 // TODO: Fix API
-                $audio = ($include_audio) ? 'true' : 'false';
+                $audio = ($this->include_audio) ? 'true' : 'false';
                 $response->body = str_replace('jQuery(function(', 
-                  "var CONFIDENTCAPTCHA_CALLBACK_URL = \"$callback_url\";
+                  "var CONFIDENTCAPTCHA_CALLBACK_URL = \"$this->callback_url\";
                    var CONFIDENTCAPTCHA_INCLUDE_AUDIO = $audio;
                    jQuery(function(" , $response->body);
             } else {
