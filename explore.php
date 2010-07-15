@@ -43,10 +43,16 @@ if (!$settings_good) {
 
 // Use a working system or a bad one?
 $fail_sim = array_get($_REQUEST, 'ccap_fail_sim');
-$valid_fail_sims = Array('bad_credentials', 'server_not_responding');
+$valid_fail_sims = Array(
+    '' => 'No simulated API failure.',
+    'bad_credentials' => 'All API calls using API credentials will fail with
+        HTTP code 401 NOT AUTHORIZED, as if using bad credentials.',
+    'server_not_responding' => 'All API calls will fail with status 0,
+        as if the CAPTCHA API server is unavailable.'
+);
 if (empty($fail_sim)) {
     $fail_sim_text = 'No failure simulated.';
-} elseif (!in_array($fail_sim, $valid_fail_sims)) {
+} elseif (!in_array($fail_sim, array_keys($valid_fail_sims))) {
     $fail_sim = NULL;
     $fail_sim_text = "\"$fail_sim\" is not valid, defaults to no failure.";
 } else {
@@ -107,12 +113,22 @@ $ccap_persist = new CCAP_PersistSession();
 
 // Pick the policy
 $policy = array_get($_REQUEST, 'ccap_policy');
-$valid_policies = Array('CCAP_ProductionFailOpen',
-    'CCAP_ProductionFailClosed', 'CCAP_DevelopmentPolicy');
+$valid_policies = Array(
+    '' => "Use default of $ccap_default_policy", 
+    'CCAP_ProductionFailOpen' => 'When CAPTCHA creation fails,
+        the form will succeed.  Useful for contact forms, where you want
+        the form to work even when the CAPTCHA doesn\'t.',
+    'CCAP_ProductionFailClosed' => 'When CAPTCHA creation fails,
+        the form will fail.  Useful for account creation forms, where you
+        don\'t want the form to proceed without a CAPTCHA check.',
+    'CCAP_DevelopmentPolicy' => 'Records all calls made to the
+        CAPTCHA API server.  Useful for initial form development and
+        troubleshooting, but will leak secrets if used in production.'
+);
 if (empty($policy)) {
     $policy_text = 'unset, defaults to ';
     $used_policy = $ccap_default_policy;
-} elseif (!in_array($policy, $valid_policies)) {
+} elseif (!in_array($policy, array_keys($valid_policies))) {
     $policy_text = "\"$policy\" is not valid, defaults to ";
     $used_policy = $ccap_default_policy;
 } else {
@@ -120,9 +136,10 @@ if (empty($policy)) {
     $used_policy = $policy;
 }
 
-if (!in_array($used_policy, $valid_policies)) {
+if (!in_array($used_policy, array_keys($valid_policies))) {
     $policy_text = "\"$used_policy\", but that's not valid either, so using ";
-    $used_policy = $valid_policies[0];
+    reset($valid_policies);
+    $used_policy = key($valid_policies);
 }
 
 $ccap_policy = CCAP_PolicyFactory::create($used_policy, $ccap_api,
@@ -180,19 +197,28 @@ $strength_text = "1 in $strength chance of a spam bot randomly guessing
 if ($strength < 1000) $strength_text .= ' (must be at least 1 in 1000)';
 
 // Get display names of parameters
-$valid_display_styles = array('flyout', 'lightbox');
+$valid_display_styles = Array(
+    '' => "Use default of 'flyout'", 
+    'flyout' => 'When clicked, the CAPTCHA flies out from the button',
+    'lightbox' => 'When clicked, the CAPTCHA appears in a lightbox'
+);
 if (empty($display_style)) {
     $display_style_text = 'unset (defaults to "flyout")';
 } else {
     $display_style_text = "\"$display_style\"";
-    if (!in_array($display_style, $valid_display_styles)) 
+    if (!in_array($display_style, array_keys($valid_display_styles))) 
         $display_style_text .= ' (not valid)';
 }
 
 if (empty($include_audio)) {
     $include_audio_text = 'unset (defaults to FALSE)';
 } else {
-    $include_audio_text = "$include_audio_text";
+    if ($include_audio == 'TRUE') {
+        $include_audio = TRUE;
+    } elseif ($include_audio == 'FALSE') {
+        $include_audio = FALSE;
+    }
+    $include_audio_text = "$include_audio";
     if (!is_bool($include_audio)) $include_audio_text .= ' (non-boolean, not valid)';
 }
 
@@ -249,7 +275,7 @@ if (empty($code_color)) {
 function url($extra = NULL)
 {
     global $display_style, $include_audio, $height, $width, $length,
-        $code_color, $policy, $settings_good, $fail_sim;
+        $code_color, $policy, $settings_good, $fail_si;
 
     $p = array();
     if ($settings_good) $p['ccap_settings_good'] = $settings_good;
@@ -506,7 +532,7 @@ function captcha_page($with_callback, $ccap_policy)
 }
 
 // New settings form
-function new_settings_form()
+function new_settings_formx()
 {
     global $display_style, $include_audio, $height, $width, $length, 
         $code_color, $policy, $settings_good, $fail_sim,
@@ -587,13 +613,105 @@ FORM;
     return $form;
 }
 
+/* Construct the settings as a list */
+function settings_sublist($valid_array, $my_value, $url_key)
+{
+    $m = $my_value;
+    $u = $url_key;
+    $o = '';
+    foreach($valid_array as $k => $d) {
+        $o .= "\n    <li>";
+        if ($k != $m) $o .= '<a href="' . url(array($u => $k)) . '">';
+        else $o .= '<b>';
+        $o .= ($k) ? $k : '&lt;Unset&gt;';
+        if ($k == $m) $o .= '</b> (selected)';
+        else $o.='</a>';
+        $o .= " - $d";
+        $o .= '</li>';
+    }
+    return $o;
+}
+
+// New settings form
+function new_settings_form()
+{
+    global $display_style, $include_audio, $height, $width, $length, 
+        $code_color, $policy, $settings_good, $fail_sim,
+        $valid_policies, $valid_display_styles, $valid_colors, 
+        $valid_fail_sims, $ccap_default_policy, $strength_text;
+    
+    $policy_sublist = settings_sublist($valid_policies, $policy,
+        'ccap_policy');
+    $fail_sublist = settings_sublist($valid_fail_sims, $fail_sim,
+        'ccap_fail_sim');
+    $display_sublist = settings_sublist($valid_display_styles,
+        $display_style, 'ccap_display_style');
+    
+    $audio_options = Array(
+        '' => 'Use default of no audio',
+        'TRUE' => 'Include audio option (if enabled for account)',
+        'FALSE' => 'Don\'t include audio option');
+    if ($include_audio === TRUE) {
+        $iaudio = 'TRUE';
+    } elseif ($include_audio === FALSE) {
+        $iaudio = 'FALSE';
+    } else {
+        $iaudio = '';
+    }
+    $audio_sublist = settings_sublist($audio_options, $iaudio,
+        'ccap_include_audio');
+    
+    if (empty($code_color)) {
+        $colors = '<b>&lt;Unset&gt;</b>(default White)';
+    } else {
+        $colors = '<a href="' . url(array('ccap_code_color' => '')) .
+            '">&lt;Unset&gt;</a>(default White)';
+    }
+    foreach($valid_colors as $c) {
+        $colors .= ', ';
+        if ($code_color == $c) {
+            $colors .= "<b>$c</b> (selected)";
+        } else {
+            $colors .= '<a href="' . url(array('ccap_code_color' => $c)) .      
+                "\">$c</a>";
+        }
+    }
+    $colors .= '.';
+    
+    $dh = (empty($height)) ? '(default 3)' : '';
+    $dw = (empty($width))  ? '(default 3)' : '';
+    $dl = (empty($length)) ? '(default 4)' : '';
+    
+    $f = <<<FORM
+<form>
+<ul>
+ <li>CAPTCHA Policy:<ul>$policy_sublist</ul></li>
+ <li>Failure Simulation:<ul>$fail_sublist</ul></li>
+ <li>Display Style:<ul>$display_sublist</ul></li>
+ <li>Include Audio?:<ul>$audio_sublist</ul></li>
+ <li>Image Code Color:$colors</li>
+</ul>
+<p>CAPTCHA Strength settings:</p>
+<ul>
+ <li>Height: <input type="text" name="ccap_height" value="$height" />$dh</li>
+ <li>Width: <input type="text" name="ccap_width" value="$width" />$dw</li>
+ <li>Length: <input type="text" name="ccap_length" value="$length" />$dl</li>
+ <li>Current Strength: $strength_text</li>
+</ul>
+<input type="submit" value="Submit" />
+</form>
+FORM;
+    return $f;
+}
+
+
 
 // Sample index page template - good config
 $good_index_template = $header_template . <<<TEMPLATE
 <body>
-  <h1>Confident CAPTCHA Demonstration</h1>
+  <h1>Confident CAPTCHA Explorer</h1>
   <p>(<a href="index.php">Return to the index</a>)</p>
-  <p>There are two Confident CAPTCHA types available:</p>
+  <p>There are two main ways to add Confident CAPTCHA to your form:</p>
   <ul>
   <li><a href="{IN_PAGE_URL}">Instant Verification CAPTCHA Method</a> -
     CAPTCHA is checked on completion, and the user gets multiple chances.
@@ -603,11 +721,9 @@ $good_index_template = $header_template . <<<TEMPLATE
     CAPTCHA is checked after form submission, and the user gets one chance.
   </li>
  </ul>
- <h2>Current Settings</h2>
- $settings_list
- {FAIL_MESSAGE}
- <h2>New Settings</h2>
+ <h2>CAPTCHA Settings</h2>
  {NEW_SETTINGS_FORM}
+ {FAIL_MESSAGE}
  $debug_area
 </body>
 </html>
@@ -671,7 +787,7 @@ function index_page($ccap_policy)
     }
 
     $tags = array(
-        'TITLE'              => 'Welcome to the Confident CAPTCHA Sample Code',
+        'TITLE'              => 'Welcome to the Confident CAPTCHA Explorer',
         'HEAD_SCRIPT'        => '',
         'NEW_SETTINGS_FORM'  => $new_settings_form,
         'IN_PAGE_URL'        => url(array('with_callback'=>'1')),

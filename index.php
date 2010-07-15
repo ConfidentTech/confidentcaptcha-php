@@ -26,7 +26,7 @@ if ($cred_check->status != 200) {
     <title>Confident CAPTCHA - PHP Library and Sample Code</title>
 </head>
 <body>
-  <h1>PHP Lbibrary and Sample Code for Confident CAPTCHA</h1>
+  <h1>PHP Library and Sample Code for Confident CAPTCHA</h1>
 
 <?php if ($credentials_good) { ?>
 <p>
@@ -35,7 +35,7 @@ Welcome to the sample code.  The samples are:
 <ul>
   <li><a href="check.php">check.php</a> - Check if your
     configuration is supported by Confident CAPTCHA.</li>
-  <li><a href="explore.php">explore.php</a> - Try out Confident CAPTCHA</li>
+  <li><a href="explore.php">explore.php</a> - Try out Confident CAPTCHA options</li>
   <li><a href="sample_before.php">sample_before.php</a> - A sample form before
     adding Confident CAPTCHA</li>
   <li><a href="sample_after.php">sample_after.php</a> - A sample form after adding Confident CAPTCHA</li>
