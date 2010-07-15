@@ -158,7 +158,7 @@ class CCAP_PolicyFactory
             if ($policy_include) include_once($policy_include);
             return new $policy_name($api, $persist);
         } else {
-            die("CCAP_PolicyFactory: Unknown policy $policy_name");
+            die("CCAP_PolicyFactory: Unknown policy '$policy_name'");
             return NULL;
         }
     }

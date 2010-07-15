@@ -50,13 +50,8 @@ $valid_fail_sims = Array(
     'server_not_responding' => 'All API calls will fail with status 0,
         as if the CAPTCHA API server is unavailable.'
 );
-if (empty($fail_sim)) {
-    $fail_sim_text = 'No failure simulated.';
-} elseif (!in_array($fail_sim, array_keys($valid_fail_sims))) {
+if (!in_array($fail_sim, array_keys($valid_fail_sims))) {
     $fail_sim = NULL;
-    $fail_sim_text = "\"$fail_sim\" is not valid, defaults to no failure.";
-} else {
-    $fail_sim_text = ucfirst(str_replace('_', ' ', $fail_sim));
 }
 
 if (empty($fail_sim)) {
@@ -126,38 +121,17 @@ $valid_policies = Array(
         troubleshooting, but will leak secrets if used in production.'
 );
 if (empty($policy)) {
-    $policy_text = 'unset, defaults to ';
     $used_policy = $ccap_default_policy;
-} elseif (!in_array($policy, array_keys($valid_policies))) {
-    $policy_text = "\"$policy\" is not valid, defaults to ";
-    $used_policy = $ccap_default_policy;
-} else {
-    $policy_text = '';
+} elseif (in_array($policy, array_keys($valid_policies))) {
     $used_policy = $policy;
+} else {
+    $used_policy = $ccap_default_policy;
+    if (!in_array($used_policy, array_keys($valid_policies))) {
+        die("Bad default policy '$ccap_default_policy'");
+    }
 }
-
-if (!in_array($used_policy, array_keys($valid_policies))) {
-    $policy_text = "\"$used_policy\", but that's not valid either, so using ";
-    reset($valid_policies);
-    $used_policy = key($valid_policies);
-}
-
 $ccap_policy = CCAP_PolicyFactory::create($used_policy, $ccap_api,
     $ccap_persist);
-
-if ($used_policy == 'CCAP_ProductionFailOpen') {
-    $policy_text .= "CCAP_ProductionFailOpen - When CAPTCHA creation fails,
-        the form will succeed.  Useful for contact forms, where you want
-        the form to work even when the CAPTCHA doesn't.";
-} elseif ($used_policy == 'CCAP_ProductionFailClosed') {
-    $policy_text .= "CCAP_ProductionFailClosed - When CAPTCHA creation fails,
-        the form will fail.  Useful for account creation forms, where you
-        don't want the form to proceed without a CAPTCHA check.";
-} elseif ($used_policy == 'CCAP_DevelopmentPolicy') {
-    $policy_text .= "CCAP_DevelopmentPolicy - Records all calls made to the
-        CAPTCHA API server.  Useful for initial form development and
-        troubleshooting, but will leak secrets if used in production.";
-}
 
 // Load CAPTCHA parameters
 $display_style = array_get($_REQUEST, 'ccap_display');
@@ -196,80 +170,32 @@ $strength_text = "1 in $strength chance of a spam bot randomly guessing
   correctly, based on height, width, length";
 if ($strength < 1000) $strength_text .= ' (must be at least 1 in 1000)';
 
-// Get display names of parameters
+// display_style
 $valid_display_styles = Array(
     '' => "Use default of 'flyout'", 
     'flyout' => 'When clicked, the CAPTCHA flies out from the button',
     'lightbox' => 'When clicked, the CAPTCHA appears in a lightbox'
 );
-if (empty($display_style)) {
-    $display_style_text = 'unset (defaults to "flyout")';
-} else {
-    $display_style_text = "\"$display_style\"";
-    if (!in_array($display_style, array_keys($valid_display_styles))) 
-        $display_style_text .= ' (not valid)';
+if (!in_array($display_style, array_keys($valid_display_styles))) {
+    $display_style = NULL;
 }
 
-if (empty($include_audio)) {
-    $include_audio_text = 'unset (defaults to FALSE)';
-} else {
-    if ($include_audio == 'TRUE') {
-        $include_audio = TRUE;
-    } elseif ($include_audio == 'FALSE') {
-        $include_audio = FALSE;
-    }
-    $include_audio_text = "$include_audio";
-    if (!is_bool($include_audio)) $include_audio_text .= ' (non-boolean, not valid)';
+// include_audio
+if ($include_audio == 'TRUE' or $include_audio === '1') {
+    $include_audio = TRUE;
+} elseif ($include_audio == 'FALSE' or $include_audio === '0') {
+    $include_audio = FALSE;
+} elseif (!is_bool($include_audio)) {
+    $include_audio = NULL;
 }
 
-if (empty($height)) {
-    $height_text = 'unset (defaults to 3)';
-} else {
-    $height_text = "$height";
-    if (!is_numeric($height)) {
-        $height_text .= ' (non-integer, not valid)';
-    } elseif ($used_height < 1) {
-        $height_text .= ' (not positive, not valid)';
-    } elseif ($strength < 1000) {
-        $height_text .= ' (CAPTCHA strength < 1000, not valid)';
-    }
-}
-
-if (empty($width)) {
-    $width_text = 'unset (defaults to 3)';
-} else {
-    $width_text = "$width";
-    if (!is_numeric($width)) {
-        $width_text .= ' (non-integer, not valid)';
-    } elseif ($used_width < 1) {
-        $width_text .= ' (not positive, not valid)';
-    } elseif ($strength < 1000) {
-        $width_text .= ' (CAPTCHA strength < 1000, not valid)';
-    }
-}
-
-if (empty($length)) {
-    $length_text = 'unset (defaults to 4)';
-} else {
-    $length_text = "$length";
-    if (!is_numeric($length)) {
-        $length_text .= ' (non-integer, not valid)';
-    } elseif ($used_length < 1) {
-        $length_text .= ' (not positive, not valid)';
-    } elseif ($strength < 1000) {
-        $length_text .= ' (CAPTCHA strength < 1000, not valid)';
-    }
-}
+if (!is_numeric($height)) $height = NULL;
+if (!is_numeric($width)) $width = NULL;
+if (!is_numeric($length)) $length = NULL;
 
 $valid_colors = array('White', 'Red', 'Orange', 'Yellow', 'Green', 'Teal',
     'Blue', 'Indigo', 'Violet', 'Gray');
-if (empty($code_color)) {
-    $code_color_text = 'unset (defaults to "White")';
-} else {
-    $code_color_text = "\"$code_color\"";
-    if (!in_array($code_color, $valid_colors))
-        $code_color_text .= ' (not valid)';
-}
+if (!in_array($code_color, $valid_colors)) $code_color= NULL; 
 
 /* URL query for these settings */
 function url($extra = NULL)
@@ -280,7 +206,7 @@ function url($extra = NULL)
     $p = array();
     if ($settings_good) $p['ccap_settings_good'] = $settings_good;
     if (!empty($display_style)) $p['ccap_display'] = $display_style;
-    if (!empty($include_audio)) $p['include_audio'] = $include_audio;
+    if (!is_null($include_audio)) $p['ccap_include_audio'] = $include_audio;
     if (!empty($height)) $p['ccap_height'] = $height;
     if (!empty($width)) $p['ccap_width'] = $width;
     if (!empty($length)) $p['ccap_length'] = $length;
@@ -313,7 +239,7 @@ function generate_page($template, $tags)
 // Don't use on your page
 $debug_area = <<< DEBUG
 <div id="confidentcaptcha_debug" style="display: none">
-<h2>CONFIDENT CAPTCHA DEBUG AREA</h2>
+<h2>Confident CAPTCHA Debug Messages</h2>
 <p>
 Debug messages will appear here if you are using CCAP_DevelopmentPolicy.
 Don't use this debug code in production - it will leak your API credentials.
@@ -402,23 +328,6 @@ $error_template = $header_template . <<<TEMPLATE
 </html>
 TEMPLATE;
 
-// Settings list
-$settings_list = <<<SETTINGS
-<ul>
-  <li>Policy: $policy_text</li>
-  <li>Simulated Failure: $fail_sim_text</li>
-  <li>Display Style: $display_style_text</li>
-  <li>Include Audio?: $include_audio_text</li>
-  <li>Height: $height_text</li>
-  <li>Width: $width_text</li>
-  <li>Length: $length_text</li>
-  <li>Code Color: $code_color_text</li>
-</ul>
-<p>
-CAPTCHA strength: $strength_text.
-</p>
-SETTINGS;
-
 // CAPTCHA page template
 $captcha_template = $header_template . <<<TEMPLATE
 <body>
@@ -448,12 +357,11 @@ TEMPLATE;
 /* Generate the captcha page */
 function captcha_page($with_callback, $ccap_policy)
 {
-    global $captcha_template, $error_template, $ccap_callback_url;
-
-    global $display_style, $include_audio, $height, $width, $length, 
+    global $captcha_template, $error_template, $ccap_callback_url,
+        $display_style, $include_audio, $height, $width, $length, 
         $code_color;
 
-    $title = ucwords('Confident CAPTCHA Demonstration');
+    $title = 'Confident CAPTCHA';
 
     // Peform any setup needed at the start of a page w/ CAPTCHA
     $start_error = $ccap_policy->start_captcha_page();
@@ -531,88 +439,6 @@ function captcha_page($with_callback, $ccap_policy)
     return $captcha_page;
 }
 
-// New settings form
-function new_settings_formx()
-{
-    global $display_style, $include_audio, $height, $width, $length, 
-        $code_color, $policy, $settings_good, $fail_sim,
-        $valid_policies, $valid_display_styles, $valid_colors, 
-        $valid_fail_sims;
-
-    $policy_options = "\n    <option value=\"\"";
-    if (empty($policy)) $policy_options .= 'selected = "selected"';
-    $policy_options .= '>(unset)</option>';
-    foreach($valid_policies as $p) {
-        $sel = ($p == $policy) ? 'selected = "selected"' : '';
-        $policy_options .= "\n    <option value=\"$p\" $sel>$p</option>";
-    }
-    $policy_options .= '\n  ';
-    
-    $fail_options = "\n    <option value=\"\"";
-    if (empty($fail_sim)) $fail_options .= 'selected = "selected"';
-    $fail_options .= '>(unset)</option>';
-    foreach($valid_fail_sims as $f) {
-        $sel = ($f == $fail_sim) ? 'selected = "selected"' : '';
-        $name = ucfirst(str_replace('_', ' ', $f));
-        $fail_options .= "\n    <option value=\"$f\" $sel>$name</option>";
-    }
-    $fail_options .= '\n  ';
-    
-    $display_options = "\n    <option value=\"\"";
-    if (empty($display_style)) $display_options .= 'selected = "selected"';
-    $display_options .= '>(unset)</option>';
-    foreach($valid_display_styles as $d) {
-        $sel = ($d == $display_style) ? 'selected = "selected"' : '';
-        $display_options .= "\n    <option value=\"$d\" $sel>$d</option>";
-    }
-    $display_options .= '\n  ';
-    
-    $ia_selected = ($include_audio) ? 'selected' : '';
-    
-    $color_options = '';
-    $color_options = "\n    <option value=\"\"";
-    if (empty($code_color)) $color_options .= 'selected = "selected"';
-    $color_options .= '>(unset)</option>';
-    foreach($valid_colors as $c) {
-        $sel = ($c == $code_color) ? 'selected = "selected"' : '';
-        $color_options .= "\n    <option value=\"$c\" $sel>$c</option>";
-    }
-    $color_options .= '\n  ';
-    
-    $form = <<<FORM
-<form name="settings" action="$_SERVER[SCRIPT_NAME]" method="get">
-  <input type="hidden" name="ccap_settings_good" value="$settings_good" />
-  <label>Policy:</label>
-  <select name="ccap_policy">$policy_options</select>
-  <br/>
-  <label>Failure Simulation:</label>
-  <select name="ccap_fail_sim">$fail_options</select>
-  <br/>
-  <label>Display Type:</label>
-  <select name="ccap_display">$display_options</select>
-  <br/>
-  <label>Include Audio?</label>
-  <input type="checkbox" name="ccap_include_audio" value="1" $ia_selected />
-  <br/>
-  <label>Height:</label>
-  <input type="text" name="ccap_height" value="$height" />
-  <br />
-  <label>Width:</label>
-  <input type="text" name="ccap_width" value="$width" />
-  <br />
-  <label>Length:</label>
-  <input type="text" name="ccap_length" value="$length" />
-  <br />
-  <label>Code Color:</label>
-  <select name="ccap_code_color">$color_options</select>
-  <br/>
-  <input type="submit" value="Submit" />
-</form>
-<p>Or, <a href="$_SERVER[SCRIPT_NAME]">reset to defaults</a></p>
-FORM;
-    return $form;
-}
-
 /* Construct the settings as a list */
 function settings_sublist($valid_array, $my_value, $url_key)
 {
@@ -645,15 +471,15 @@ function new_settings_form()
     $fail_sublist = settings_sublist($valid_fail_sims, $fail_sim,
         'ccap_fail_sim');
     $display_sublist = settings_sublist($valid_display_styles,
-        $display_style, 'ccap_display_style');
+        $display_style, 'ccap_display');
     
     $audio_options = Array(
         '' => 'Use default of no audio',
         'TRUE' => 'Include audio option (if enabled for account)',
         'FALSE' => 'Don\'t include audio option');
-    if ($include_audio === TRUE) {
+    if ($include_audio === TRUE or $include_audio === 1) {
         $iaudio = 'TRUE';
-    } elseif ($include_audio === FALSE) {
+    } elseif ($include_audio === FALSE or $include_audio === 0) {
         $iaudio = 'FALSE';
     } else {
         $iaudio = '';
@@ -703,8 +529,6 @@ function new_settings_form()
 FORM;
     return $f;
 }
-
-
 
 // Sample index page template - good config
 $good_index_template = $header_template . <<<TEMPLATE
