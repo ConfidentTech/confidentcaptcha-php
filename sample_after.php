@@ -34,14 +34,6 @@ $alert='';
 // If this a form submission...
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
-    // Read the Confident CAPTCHA form elements
-    $block_id = isset($_REQUEST['confidentcaptcha_block_id']) ?
-        $_REQUEST['confidentcaptcha_block_id']: '';
-    $captcha_id = isset($_REQUEST['confidentcaptcha_captcha_id']) ?
-        $_REQUEST['confidentcaptcha_captcha_id']: '';
-    $code = isset($_REQUEST['confidentcaptcha_code']) ?
-        $_REQUEST['confidentcaptcha_code']: '';
-    
     // Check required elements
     $missing = array();
     if (empty($name)) $missing[] = 'Name';
@@ -55,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
     } elseif (!strpos($email, '@', 1)) {
         // TODO: Bob - bob@bob and bob@@bob.com aren't valid, either
         $message = "Please enter a valid email address.";
-    } elseif (!$ccap_policy->check_visual($block_id, $captcha_id, $code)) {
+    } elseif (!$ccap_policy->check_form($_REQUEST)) {
         $message = "CAPTCHA failed - please try again.";
     } else {
         // TODO: Bob - add code to email this message to sales
@@ -80,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 // Start a new Confident CAPTCHA on every page load
 $ccap_policy->reset();
-$ccap_captcha = $ccap_policy->create_visual('callback.php');
+$ccap_captcha = $ccap_policy->create_visual($ccap_callback_url);
 
 // Show the form on GET or POST   
 echo <<<HTML

@@ -818,18 +818,24 @@ $d_body";
     }
     
     /**
-     * Check if we're already authenticated
-     * @return boolean TRUE if authenticated, FALSE if failed, NULL if not
-     * attempted.
+     * Check a form submission, including instant authentication state
+     *
+     * @param array $request The form request parameters ($_REQUEST)
+     * @return boolean TRUE if authenticated
      */
-    protected function check()
+    public function check_form($request)
     {
-        if (!is_null($this->visual_authenticated)) {
-            return $this->visual_authenticated;
-        } elseif (!is_null($this->audio_authenticated)) {
-            return $this->audio_authenticated;
+        if ($this->audio_authenticated === TRUE or
+            $this->visual_authenticated === TRUE) {
+            return TRUE;
         } else {
-            return NULL;
+            $block_id = isset($request['confidentcaptcha_block_id']) ?
+                $request['confidentcaptcha_block_id']: '';
+            $captcha_id = isset($request['confidentcaptcha_captcha_id']) ?
+                $request['confidentcaptcha_captcha_id']: '';
+            $code = isset($request['confidentcaptcha_code']) ?
+                $request['confidentcaptcha_code']: '';
+            return $this->check_visual($block_id, $captcha_id, $code);
         }
     }
     

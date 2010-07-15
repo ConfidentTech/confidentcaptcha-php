@@ -383,11 +383,7 @@ function captcha_page($with_callback, $ccap_policy)
     // If POST, then check last CAPTCHA
     if ($_SERVER['REQUEST_METHOD'] == 'POST')
     {
-        $block_id = array_get($_REQUEST, 'confidentcaptcha_block_id');
-        $captcha_id = array_get($_REQUEST, 'confidentcaptcha_captcha_id');
-        $code = array_get($_REQUEST, 'confidentcaptcha_code');
-        $captcha_solved = $ccap_policy->check_visual($block_id, $captcha_id,
-            $code);
+        $captcha_solved = $ccap_policy->check_form($_REQUEST);
         // For this sample, just print if successful or not.
         if ($captcha_solved) {
             $check_captcha_text = 'Success!  Try another, or ';
