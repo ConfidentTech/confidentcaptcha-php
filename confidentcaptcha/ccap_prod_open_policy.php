@@ -1,5 +1,4 @@
 <?php
-
 /*
 You must elect to use this software under one of:
  * The GNU GPL v2.0 License or later
@@ -80,6 +79,9 @@ If licensed under the Simplified BSD License:
  * @version   20100621_PHP_2
  */
 
+/**
+ * Include definition of {@link CCAP_Policy}
+ */
 require_once("confidentcaptcha/ccap_policy.php");
 
 /**

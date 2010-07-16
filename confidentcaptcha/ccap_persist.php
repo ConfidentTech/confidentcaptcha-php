@@ -131,7 +131,7 @@ abstract class CCAP_Persistence
  *
  * @package confidentcaptcha-php
  */
-class CCAP_PersistNull
+class CCAP_PersistNull extends CCAP_Persistence
 {
     /**
      * Initialize the policy state from persistance store
@@ -177,7 +177,7 @@ class CCAP_PersistNull
  *
  * @package confidentcaptcha-php
  */
-class CCAP_PersistSession
+class CCAP_PersistSession extends CCAP_Persistence
 {   
     /**
      * Load state from session

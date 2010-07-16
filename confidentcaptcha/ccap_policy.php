@@ -233,6 +233,7 @@ abstract class CCAP_Policy
      * Construct a CCAP_Policy
      *
      * @param CCAP_Api $api The API interface to use for calls
+     * @param CCAP_Persistance $persist The persistance strategy object
      */
     public function __construct($api, $persist)
     {
@@ -252,7 +253,6 @@ abstract class CCAP_Policy
      * Check local and remote configuration
      *
      * @return array with keys 'html' (HTML string) and 'passed' (boolean)
-     * @todo Add local config check
      */
     public function check_config($callback_url)
     {
@@ -885,7 +885,7 @@ $d_body";
         return $result;
     }
 
-    /*
+    /**
      * Provide extended callback functions
      *
      * Return NULL if you can't handle the callback either.

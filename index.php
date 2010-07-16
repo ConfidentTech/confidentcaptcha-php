@@ -30,7 +30,7 @@ if ($cred_check->status != 200) {
 
 <?php if ($credentials_good) { ?>
 <p>
-Welcome to the sample code.  The samples are:
+The samples are:
 </p>
 <ul>
   <li><a href="check.php">check.php</a> - Check if your
@@ -40,6 +40,7 @@ Welcome to the sample code.  The samples are:
     adding Confident CAPTCHA</li>
   <li><a href="sample_after.php">sample_after.php</a> - A sample form after adding Confident CAPTCHA</li>
 </ul>
+<p>You can also read the <a href="docs/index.html">library reference</a></p>
 
 <?php } else /* credentials not good */ { ?>
 
