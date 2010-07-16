@@ -149,4 +149,87 @@ class CCAP_DevelopmentPolicy extends CCAP_Policy
         }
         return $result;
     }
+    
+    /**
+     * Get HTML for debug section
+     *
+     * Inject this into your page to add the API debug messages.
+     * @param string $callback_url The callback URL
+     * @return string HTML to inject into page
+     */
+    public function get_debug_html($callback_url)
+    {
+        // Insertion to get debug messages
+        // Don't use on your page
+        return <<< DEBUG
+<div id="confidentcaptcha_debug" style="display: none">
+<h2>Confident CAPTCHA Debug Messages</h2>
+<p>
+Debug messages will appear here if you are using CCAP_DevelopmentPolicy.
+Don't use this debug code in production - it will leak your API credentials.
+</p><p>
+Use the <a href="#confidentcaptcha_actions">links at the bottom</a> to get
+more debug information.
+</p>
+<ul></ul>
+<a name="confidentcaptcha_actions">Actions:</a>
+<a href="#" class='confidentcaptcha_debug_refresh'>Fetch new debug
+ messages</a>
+<a href="#" class='confidentcaptcha_debug_dump'>Dump policy state</a>
+</div>
+<script type="text/javascript">
+    function confidentcaptcha_get_debug(depth, first_call, method)
+    {
+        if (depth > 5) { return; }
+        if (!"$callback_url") {
+            $("#confidentcaptcha_debug").css("display","block");
+            $("#confidentcaptcha_debug ul").append(
+                "<li>callback_url is not set</li>");
+            return;
+        }
+        $.ajax({
+            type: 'POST',
+            url: "$callback_url",
+            data: {endpoint: method},
+            dataType: 'text',
+            success: function(html) {
+                $("#confidentcaptcha_debug").css("display","block");
+                if (html) {
+                    $("#confidentcaptcha_debug ul").append(
+                        "<li>"+html+"</li>");
+                    // Recursively call until empty string is returned
+                    if (method == 'get_api_debug') {
+                        confidentcaptcha_get_debug(depth + 1, false, method);
+                    }
+                } else if (depth == 1) {
+                    $("#confidentcaptcha_debug ul").append(
+                        "<li>No new debug messages</li>");
+                }
+            },
+            error: function() {
+                if (!first_call) {
+                    // Will return 400 if CCAP_DevelopmentPolicy is not used
+                    $("#confidentcaptcha_debug ul").append(
+                        "<li><b>Error: callback failed.  Are you using" +
+                        "CCAP_DevelopmentPolicy?</b></li>"
+                    );
+                }
+            }
+        });
+    };
+    $(document).ready(function() {
+        confidentcaptcha_get_debug(1, true, 'get_api_debug');
+
+        $("a.confidentcaptcha_debug_refresh").click(function() {
+            confidentcaptcha_get_debug(1, false, 'get_api_debug');
+            return false;
+        });
+        $("a.confidentcaptcha_debug_dump").click(function() {
+            confidentcaptcha_get_debug(1, false, 'get_policy_dump');
+            return false;
+        });
+    });
+</script>
+DEBUG;
+    }
 }

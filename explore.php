@@ -235,77 +235,12 @@ function generate_page($template, $tags)
     return $page;
 }
 
-// Insertion to get debug messages
-// Don't use on your page
-$debug_area = <<< DEBUG
-<div id="confidentcaptcha_debug" style="display: none">
-<h2>Confident CAPTCHA Debug Messages</h2>
-<p>
-Debug messages will appear here if you are using CCAP_DevelopmentPolicy.
-Don't use this debug code in production - it will leak your API credentials.
-</p><p>
-Use the <a href="#confidentcaptcha_actions">links at the bottom</a> to get
-more debug information.
-</p>
-<ul></ul>
-<a name="confidentcaptcha_actions">Actions:</a>
-<a href="#" class='confidentcaptcha_debug_refresh'>Fetch new debug
- messages</a>
-<a href="#" class='confidentcaptcha_debug_dump'>Dump policy state</a>
-</div>
-<script type="text/javascript">
-    function confidentcaptcha_get_debug(depth, first_call, method)
-    {
-        if (depth > 5) { return; }
-        if (!"$ccap_callback_url") {
-            $("#confidentcaptcha_debug ul").append(
-                "<li>ccap_callback_url is not set</li>");
-            return;
-        }
-        $.ajax({
-            type: 'POST',
-            url: "$ccap_callback_url",
-            data: {endpoint: method},
-            dataType: 'text',
-            success: function(html) {
-                $("#confidentcaptcha_debug").css("display","block");
-                if (html) {
-                    $("#confidentcaptcha_debug ul").append(
-                        "<li>"+html+"</li>");
-                    // Recursively call until empty string is returned
-                    if (method == 'get_api_debug') {
-                        confidentcaptcha_get_debug(depth + 1, false, method);
-                    }
-                } else if (depth == 1) {
-                    $("#confidentcaptcha_debug ul").append(
-                        "<li>No new debug messages</li>");
-                }
-            },
-            error: function() {
-                if (!first_call) {
-                    // Will return 400 if CCAP_DevelopmentPolicy is not used
-                    $("#confidentcaptcha_debug ul").append(
-                        "<li><b>Error: callback failed.  Are you using" +
-                        "CCAP_DevelopmentPolicy?</b></li>"
-                    );
-                }
-            }
-        });
-    };
-    $(document).ready(function() {
-        confidentcaptcha_get_debug(1, true, 'get_api_debug');
-        
-        $("a.confidentcaptcha_debug_refresh").click(function() {
-            confidentcaptcha_get_debug(1, false, 'get_api_debug');
-            return false;
-        });
-        $("a.confidentcaptcha_debug_dump").click(function() {
-            confidentcaptcha_get_debug(1, false, 'get_policy_dump');
-            return false;
-        });
-    });
-</script>
-DEBUG;
+// Debug HTML and JavaScript (Development policy only)
+if ($used_policy == 'CCAP_DevelopmentPolicy') {
+    $debug_area = $ccap_policy->get_debug_html($ccap_callback_url);
+} else {
+    $debug_area = '';
+}
 
 // Shared page header
 $header_template = <<<TEMPLATE
@@ -509,6 +444,7 @@ function new_settings_form()
     $dl = (empty($length)) ? '(default 4)' : '';
     
     $f = <<<FORM
+<h2>CAPTCHA Settings</h2>
 <form>
 <ul>
  <li>CAPTCHA Policy:<ul>$policy_sublist</ul></li>
@@ -517,7 +453,7 @@ function new_settings_form()
  <li>Include Audio?:<ul>$audio_sublist</ul></li>
  <li>Image Code Color:$colors</li>
 </ul>
-<p>CAPTCHA Strength settings:</p>
+<h3>CAPTCHA Strength settings</h3>
 <ul>
  <li>Height: <input type="text" name="ccap_height" value="$height" />$dh</li>
  <li>Width: <input type="text" name="ccap_width" value="$width" />$dw</li>
@@ -545,7 +481,6 @@ $good_index_template = $header_template . <<<TEMPLATE
     CAPTCHA is checked after form submission, and the user gets one chance.
   </li>
  </ul>
- <h2>CAPTCHA Settings</h2>
  {NEW_SETTINGS_FORM}
  {FAIL_MESSAGE}
  $debug_area
