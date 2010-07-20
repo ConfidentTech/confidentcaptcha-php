@@ -123,11 +123,12 @@ abstract class CCAP_Persistence
 /**
  * "Do Nothing" as persistance strategy.
  *
- * Used for stateless Confident CAPTCHA.  Restricts you to single-CAPTCHA
- * method and forms that fail when the CAPTCHA server fails.  Not recommended,
- * but it is a good starting place for your own persistance implementation,
- * or if you want to handle persistance yourself (for example, storing the
- * CCAP_Policy instance in the session).
+ * Used for stateless Confident CAPTCHA.  This restricts you to delayed
+ * CAPTCHA validation, and means forms will fail when the CAPTCHA server
+ * fails.  This class is not recommended for general use, but it is a good
+ * for a quick API credentials check, or as a starting place for your own
+ * persistance implementation, or if you want to handle persistance yourself
+ * (for example, storing the CCAP_Policy instance in the session).
  *
  * @package confidentcaptcha-php
  */
@@ -135,6 +136,8 @@ class CCAP_PersistNull extends CCAP_Persistence
 {
     /**
      * Initialize the policy state from persistance store
+     *
+     * The null policy doesn't load anything.
      *
      * @var CCAP_Policy $policy The policy instance to initialize
      */
@@ -144,6 +147,9 @@ class CCAP_PersistNull extends CCAP_Persistence
     
     /**
      * Get stored policy name
+     *
+     * The null policy doesn't store the policy name, so return is NULL.
+     *
      * @return string The policy class name
      */
     public function policy_name()
@@ -154,6 +160,8 @@ class CCAP_PersistNull extends CCAP_Persistence
     /**
      * Save the policy state to persistance store
      *
+     * The null policy doesn't save anything.
+     *
      * @var CCAP_Policy $policy The policy instance to save
      */
     public function save(&$policy)
@@ -162,6 +170,8 @@ class CCAP_PersistNull extends CCAP_Persistence
 
     /**
      * Clear the policy state in persistance store
+     *
+     * The null policy is already clear.
      *
      * @var CCAP_Policy $policy The policy instance to clear
      */
@@ -173,7 +183,11 @@ class CCAP_PersistNull extends CCAP_Persistence
 /**
  * Session-based persistence for Confident CAPTCHA Policies
  *
- * Use PHP's $_SESSION to store Confident CAPTCHA state
+ * Uses PHP's $_SESSION to store Confident CAPTCHA state.  All functions
+ * require a session.  Either call session_start() at the top of a PHP
+ * page that will use CAPTCHA, or, better yet, call
+ * CCAP_Policy->start_captcha_page() at the top of the PHP page,
+ * before any output or headers are sent.
  *
  * @package confidentcaptcha-php
  */
@@ -181,7 +195,6 @@ class CCAP_PersistSession extends CCAP_Persistence
 {   
     /**
      * Load state from session
-     *
      * @var CCAP_Policy $policy The policy instance to initialize
      */
     public function load(&$policy)
@@ -201,8 +214,8 @@ class CCAP_PersistSession extends CCAP_Persistence
     }
 
     /**
-     * Get stored policy name
-     * @return string The policy class name
+     * Get the stored policy name from the SESSION
+     * @return string The policy class name, or NULL if none stored
      */
     public function policy_name()
     {

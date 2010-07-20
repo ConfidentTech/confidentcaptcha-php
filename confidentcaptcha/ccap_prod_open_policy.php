@@ -102,6 +102,10 @@ class CCAP_ProductionFailOpen extends CCAP_Policy
 {
     /**
      * Respond with success if captcha creation failed
+     *
+     * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
+     * @return boolean TRUE if CAPTCHA creation failed, else result of visual
+     *                 authentication
      */
     protected function respond_check_visual($response)
     {

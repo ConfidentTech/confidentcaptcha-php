@@ -102,6 +102,14 @@ require_once("confidentcaptcha/ccap_policy.php");
 class CCAP_ProductionFailClosed extends CCAP_Policy
 {
     /**
+     * HTML message on failure
+     * @var string
+     */
+    const FAIL_MESSAGE = 
+        '<p>CAPTCHA creation failed.  Please try again later.</p>';
+    
+    
+    /**
      * On creation failure, tell the user that the form is broken
      *
      * It is better for the site owner to examine $visual_creation_succeeded,
@@ -117,7 +125,7 @@ class CCAP_ProductionFailClosed extends CCAP_Policy
         if ($response->status == 200) {
             return $response->body;
         } elseif (!$this->visual_creation_succeeded) {
-            return "<p>CAPTCHA creation failed.  Please try again later.</p>";
+            return self::FAIL_MESSAGE;
         } else {
             return "";
         }

@@ -82,8 +82,8 @@ If licensed under the Simplified BSD License:
 /**
  * Policy factory for Confident CAPTCHA policies
  *
- * When recreating a policy with the help of the persistence engine, it is
- * sometimes useful to create a policy by name.
+ * When recreating a policy with the help of the persistence engine, this
+ * class can be used to create or restore a policy by class name.
  *
  * @package confidentcaptcha-php
  */
@@ -120,6 +120,9 @@ class CCAP_PolicyFactory
 
     /**
      * Does the factory know about a policy?
+     *
+     * @param string $policy_name The name of the policy
+     * @return boolean TRUE if known, FALSE if unknown
      */
     static public function known($policy_name)
     {
@@ -173,7 +176,7 @@ class CCAP_PolicyFactory
      * @param CCAP_Persist $persist The persistence engine to query
      * @param CCAP_API $api The API class to pass to the policy
      * @param string $fallback_policy_name The fallback new policy to create
-     * @return CCAP_Policy The restored polcy or a new fallback policy
+     * @return CCAP_Policy The restored policy or a new fallback policy
      */
     static public function restore($persist, $api, $fallback_policy_name=NULL)
     {

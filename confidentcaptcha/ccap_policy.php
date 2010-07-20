@@ -83,16 +83,30 @@ If licensed under the Simplified BSD License:
 /**
  * Policy interface for the Confident CAPTCHA API
  *
- * In most cases, the web site will call the Confident CAPTCHA API and use the
- * returned data.  However, if something goes wrong, such as failed API
- * credentials or the site is unavailable due to maintenance, then the status
- * of the API call and the web site policy will determine what happens.  This
- * class provides the policy interface, so that the website code can stay the
- * same when the policy is switched.
+ * In normal siutations, the web server will:
+ * - Call the Confident CAPTCHA API to create a CAPTCHA, and inject the 
+ *   returned HTML into the page,
+ * - (Optionally) Use a callback to check a user's CAPTCHA solution with the
+ *   Confident CAPTCHA API immediately after they try it, and
+ * - At form submission, check with the Confident CAPTCHA API that the user
+ *   correctly solved the CAPTCHA.
+ *
+ * However, if something goes wrong, such as failed API credentials or the
+ * site is unavailable due to maintenance, then things get more complicated.
+ * This policy interface takes care of the details of failed connections,
+ * so that Confident CAPTCHA 'just works'.
+ *
+ * There are state variables that allow the website developer to handle error
+ * cases themselves, as well as customization points so that a derived class
+ * can encapsulate the site policy, and different policies can be used on
+ * different pages with a one-line change.
+ *
+ * We don't recommend using this class directly, but instead using one of the
+ * provided derived classes, or create your own derived policy.
  *
  * @package confidentcaptcha-php
  */
-abstract class CCAP_Policy
+class CCAP_Policy
 {
     /**
      * API interface to use for calls
@@ -103,9 +117,9 @@ abstract class CCAP_Policy
     /**
      * Debug Level for API calls
      *
-     * 0 - No debugging
-     * 1 - Only exceptions (non-200s)
-     * 2 - All API calls
+     * - 0: No debugging
+     * - 1: Only exceptions (non-200s)
+     * - 2: All API calls
      * @var integer
      */
     public $api_debug_level = 0;
@@ -124,6 +138,12 @@ abstract class CCAP_Policy
     
     /**
      * Visual CAPTCHA - No more CAPTCHAs can be created with this block
+     *
+     * When the callback is used, a user gets instant feedback if their
+     * guess is correct, and has a chance to try again.  They don't get
+     * unlimited chances - eventually the API server will respond 430 GONE.
+     * When that happens, this boolean is TRUE.
+     *
      * @var boolean
      */
     public $block_done = NULL;
@@ -244,6 +264,10 @@ abstract class CCAP_Policy
 
     /**
      * Start a page containing CAPTCHA
+     *
+     * When using CCAP_PersistSession for persistence, this will
+     * call session_start() if needed, and load the previous CAPTCHA
+     * state.
      */
     public function start_captcha_page()
     {
@@ -412,6 +436,9 @@ abstract class CCAP_Policy
 
     /**
      * Call an API function
+     *
+     * This awkward function is used so that API calls can be optionally
+     * logged for debugging purposes.
      */
     protected function call_api()
     {
@@ -465,7 +492,8 @@ $d_body";
     /**
      * Handle a debug statement
      *
-     * The default implementation does nothing
+     * The default implementation does nothing.  You can override to send to
+     * a log file, send an email to developers, or something else.
      * 
      * @param string $debug The debug statement
      */
@@ -474,9 +502,10 @@ $d_body";
     }
 
     /**
-     * Reset to clean state
+     * Reset to initial state, discarding any current CAPTCHA
      *
-     * Should be called after a CAPTCHA session
+     * This should be called after a CAPTCHA has been checked and the form
+     * accepted or rejected.
      */
     public function reset()
     {
@@ -499,7 +528,7 @@ $d_body";
     }
 
     /**
-     * Create a multiple-CAPTCHA block
+     * Create a multiple-CAPTCHA block on the CAPTCHA API server
      */
     protected function create_block()
     {
@@ -516,9 +545,6 @@ $d_body";
 
     /**
      * Create HTML for a visual CAPTCHA
-     *
-     * If 'multiple' is chosen (recommended), then a block is created as
-     * needed, and the block_id is stored in {@link $block_id}.
      *
      * @param string  $callback_url  The callback URL for instant feedback,
      *                               or NULL for delayed feedback.
@@ -614,6 +640,9 @@ $d_body";
     /**
      * Create the response HTML for create_visual
      *
+     * Derived classes may want to modify the HTML, or perform different
+     * actions on API failures
+     *
      * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
      * @return string HTML to inject into the page
      */
@@ -683,6 +712,8 @@ $d_body";
     /**
      * Create the response boolean for check_visual
      *
+     * Derived classes may want to change the response on API failures.
+     *
      * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
      * @return boolean TRUE if authenticated
      */
@@ -694,11 +725,13 @@ $d_body";
     /**
      * Start an audio CAPTCHA
      *
-     * If $block_id is set, then it will be used.  Otherwise, it will be a 
-     * single audio CAPTCHA
+     * If $block_id is set, then it will be used.  Otherwise, a new block
+     * will be created.
      *
-     * @param string  $phone_number US phone number with area code
-     * @param string  $block_id     Block ID from form, or NULL to generate
+     * @param string  $phone_number US phone number with area code, such as
+     *                              9185551234
+     * @param string  $block_id     Block ID from form, or NULL to generate a
+     *                              new block ID
      * @return string Audio response XML
      */
     public function start_audio($phone_number, $block_id=NULL)
@@ -739,6 +772,9 @@ $d_body";
     
     /**
      * Create the response XML for start_audio
+     *
+     * Derived classes may want to modify the HTML, or perform different
+     * actions on API failures
      *
      * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
      * @return  string Audio response XML
@@ -814,6 +850,8 @@ $d_body";
     /**
      * Create the response boolean for check_audio
      *
+     * Derived classes may want to change the response on API failures.
+     *
      * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
      * @return boolean TRUE if authenticated
      */
@@ -823,7 +861,8 @@ $d_body";
     }
     
     /**
-     * Check a form submission, including instant authentication state
+     * Check a form submission, pulling parameters out of the request and
+     * checking for instant authentication.
      *
      * @param array $request The form request parameters ($_REQUEST)
      * @return boolean TRUE if authenticated
@@ -845,7 +884,7 @@ $d_body";
     }
     
     /**
-     * Provide the callback function
+     * Handle asynchronous callbacks
      *
      * @param string $endpoint The desired callback endpoint
      * @param array  $request  The request parameters
@@ -887,9 +926,9 @@ $d_body";
     }
 
     /**
-     * Provide extended callback functions
+     * Entrypoint for derived classes to provide extended callback functions
      *
-     * Return NULL if you can't handle the callback either.
+     * Derived classes should return NULL on unknown functions
      *
      * @param string $endpoint The desired callback endpoint
      * @param array  $request  The request parameters

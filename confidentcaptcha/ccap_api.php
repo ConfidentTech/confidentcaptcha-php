@@ -157,7 +157,7 @@ class CCAP_ApiResponse
 
 
 /**
- * Access functions for the Confident CAPTCHA API
+ * Interface for the Confident CAPTCHA API
  *
  * The Confident CAPTCHA API, with documentation, is found at:
  * {@link http://captcha.confidenttechnologies.com}
@@ -232,6 +232,8 @@ class CCAP_Api
      * customer to request them to update their library.
      * 
      * @var string
+     * @todo Make this true - The end part of the version string
+     *  (20100621_PHP_ENDPART) is not currently ignored
      */
     protected $library_version;
 
@@ -345,7 +347,7 @@ class CCAP_Api
     }
     
     /**
-     * Fake a call the Confident CAPTCHA API
+     * Create a shortcut response, faking a call the Confident CAPTCHA API
      *
      * This is used when a parameter is unset or known, and a failed
      * response can be generated without bothering the CAPTCHA server.
