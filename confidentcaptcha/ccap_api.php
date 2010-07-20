@@ -348,7 +348,8 @@ class CCAP_Api
      * Fake a call the Confident CAPTCHA API
      *
      * This is used when a parameter is unset or known, and a failed
-     * response can be generated without bothering the CAPTCHA server
+     * response can be generated without bothering the CAPTCHA server.
+     * It is enabled by setting {@link $use_shortcut}.
      *
      * @param string  $resource        The resource to call
      * @param string  $method          The HTTP method to use (POST or GET)
@@ -358,7 +359,7 @@ class CCAP_Api
      * @param string  $body            The body to return
      * @return CCAP_ApiResponse  The response
      */
-    protected function fake_call($resource, $method, $params, 
+    protected function shortcut($resource, $method, $params, 
         $use_credentials, $status, $body)
     {
         $req = $this->prep_req($resource, $method, $params, $use_credentials);
@@ -467,7 +468,7 @@ class CCAP_Api
 
         if ($this->use_shortcuts) {
             if (!$this->api_credentials_set()) {
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     401, "<p><b>401 Not Authorized</b>(API credentials".
                     " unset, shortcut used).</p>");
             }
@@ -526,7 +527,7 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($block_id)) {
                 // If block_id is unset, the call will fail with 404
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     404, "<p><b>404 Not Found</b>(block_id is empty,".
                     " shortcut used).</p>");
             }
@@ -534,7 +535,7 @@ class CCAP_Api
             $check = $this->check_visual_settings($params);
             if (!is_null($check)) {
                 // Visual Settings are bad, will result in 400
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     400, $check);
             }
         }
@@ -566,17 +567,17 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($block_id)) {
                 // If block_id is unset, the call will fail with 404
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     404, "<p><b>404 Not Found</b>(block_id is empty,".
                     " shortcut used).</p>");
             } elseif (empty($visual_id)) {
                 // If visual_id is unset, the call will fail with 404
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     404, "<p><b>404 Not Found</b>(visual_id is empty,".
                     " shortcut used).</p>");
             } elseif (empty($code)) {
                 // If the code is unset, the call will fail with 200, False
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     200, "False");
             }
         }
@@ -607,12 +608,12 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($block_id)) {
                 // If block_id is unset, the call will fail with 404
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     404, "<p><b>404 Not Found</b>(block_id is empty,".
                     " shortcut used).</p>");
             } elseif (empty($phone_number)) {
                 // If the phone number is unset, the call will fail with 400
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     400, "<p><b>404 Not Found</b>(phone_number is empty,".
                     " shortcut used).</p>");
             }
@@ -639,12 +640,12 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($block_id)) {
                 // If block_id is unset, the call will fail with 404
-                return $this->fake_call($resource, $method, $params, $cred, 
+                return $this->shortcut($resource, $method, $params, $cred, 
                     404, "<p><b>404 Not Found</b>(block_id is empty,".
                     " shortcut used).</p>");
             } elseif (empty($audio_id)) {
                 // If audio_id is unset, the call will fail with 404
-                return $this->fake_call($resource, $method, $params, $cred, 
+                return $this->shortcut($resource, $method, $params, $cred, 
                     404, "<p><b>404 Not Found</b>(audio_id is empty,".
                     " shortcut used).</p>");
             }
@@ -698,7 +699,7 @@ class CCAP_Api
             $check = $this->check_visual_settings($params);
             if (!is_null($check)) {
                 // Visual Settings are bad, will result in 400
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     400, $check);
             }
         }
@@ -734,12 +735,12 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($captcha_id)) {
                 // If captcha_id is unset, the call will fail with 404
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     404, "<p><b>404 Not Found</b>(captcha_id is empty,".
                     " shortcut used).</p>");
             } elseif (empty($code)) {
                 // If the code is unset, the call will fail with 200, False
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     200, "False");
             }
         }
@@ -771,7 +772,7 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($phone_number)) {
                 // If the phone number is unset, the call will fail with 400
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     400, "<p><b>404 Not Found</b>(phone_number is empty,".
                     " shortcut used).</p>");
             }
@@ -799,7 +800,7 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($onekey_id)) {
                 // If onekey_id is unset, the call will fail with 404
-                return $this->fake_call($resource, $method, $params, $cred,
+                return $this->shortcut($resource, $method, $params, $cred,
                     404, "<p><b>404 Not Found</b>(onekey_id is empty,".
                     " shortcut used).</p>");
             }

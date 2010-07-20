@@ -63,7 +63,7 @@ if (empty($fail_sim)) {
             $use_credentials)
         {
             if ($use_credentials) {
-                $response = $this->fake_call($resource, $method, $params,
+                $response = $this->shortcut($resource, $method, $params,
                     $use_credentials, 401, 'Not Authorized (Fake)');
             } else {
                 $response = parent::call($resource, $method, $params, 
@@ -83,7 +83,7 @@ if (empty($fail_sim)) {
         protected function call($resource, $method, $params, 
             $use_credentials)
         {
-            return $this->fake_call($resource, $method, $params,
+            return $this->shortcut($resource, $method, $params,
                 $use_credentials, 0, 'Server not responding (fake)');
         }
     }
