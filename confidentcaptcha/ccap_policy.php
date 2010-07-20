@@ -766,27 +766,33 @@ $d_body";
             $this->audio_id = NULL;
         }
         
-        $this->persist->save($this, 'start_audio', $result);
+        $this->persist->save($this, 'start_audio', $response);
         return $this->respond_create_audio($response);
     }
     
     /**
      * Create the response XML for start_audio
      *
-     * Derived classes may want to modify the HTML, or perform different
+     * Derived classes may want to modify the XML, or perform different
      * actions on API failures
      *
      * @param CCAP_ApiResponse $response The response from {@link CCAP_Api}
      * @return  string Audio response XML
      */
-     protected function respond_create_audio($response)
-     {
-         if ($response->status == 200) {
-             return $response->body;
-         } else {
-             return "";
-         }
-     }
+    protected function respond_create_audio($response)
+    {
+        $status = $response->status;
+        $onekey_id = ($status == 200) ? $response->body : '';
+        $xml = <<<XML
+<?xml version="1.0"?>
+<response>
+  <status>$status</status>
+  <onekey_id>$onekey_id</onekey_id>
+</response>
+XML;
+        return $xml;
+    }
+
 
     /**
      * Check audio CAPTCHA submission
@@ -800,8 +806,8 @@ $d_body";
     {
         // Did creating the audio CAPTCHA succeed?
         $response = NULL;
-        $check_on_server = FALSE;
-        if (!$this->audio_creation_succeeded === FALSE) {
+        $check_on_server = TRUE;
+        if ($this->audio_creation_succeeded === FALSE) {
             $check_on_server = FALSE;
         } else {
             // Check that form matches captcha creation
@@ -821,12 +827,12 @@ $d_body";
         if ($this->audio_authenticated === TRUE) {
             $check_on_server = FALSE;
         }
-        
+
         if ($check_on_server) {
             $response = $this->call_api('check_audio', $this->block_id, 
                 $captcha_id);
         }
-        
+
         // Set state
         if (!is_null($response)) {
             if ($response->status == 200) {
@@ -842,9 +848,9 @@ $d_body";
                 $this->audio_authenticated = FALSE;
             }
         }
-        
-        $this->persist->save($this, 'check_audio', $result);
-        return $this->respond_check_audio($result);
+
+        $this->persist->save($this, 'check_audio', $response);
+        return $this->respond_check_audio($response);
     }
 
     /**
@@ -872,6 +878,9 @@ $d_body";
         if ($this->audio_authenticated === TRUE or
             $this->visual_authenticated === TRUE) {
             return TRUE;
+        } elseif ($this->audio_creation_succeeded and
+            is_null($this->audio_authenticated)) {
+            return $this->check_audio($this->block_id, $this->audio_id);
         } else {
             $block_id = isset($request['confidentcaptcha_block_id']) ?
                 $request['confidentcaptcha_block_id']: '';
@@ -896,12 +905,15 @@ $d_body";
         $headers = Array();
         $result = NULL;
         if ($endpoint == 'block_onekey_start') {
-            $content = $this>start_audio($_REQUEST['block_id'],
-                $_REQUEST['phone_number']);
+            $content = $this->start_audio($request['phone_number'],
+                $request['block_id']);
             $headers[] = "Content-type: text/xml"; 
         } elseif ($endpoint == 'block_onekey_verify') {
-            $content = $this->check_audio($_REQUEST['block_id'], 
-                $_REQUEST['captcha_id']);
+            $block_id = $request['block_id'];
+            $auth = $this->check_audio($block_id, $request['captcha_id']);
+            $auth_status = ($auth) ? 'True' : 'False';
+            $content = "<response><block_id>$block_id</block_id>".
+                "<authenticated>$auth_status</authenticated></response>";
             $headers[] = "Content-type: text/xml";
         } elseif ($endpoint == 'create_captcha_instance') {
             $content = $this->create_visual();
@@ -909,8 +921,8 @@ $d_body";
                 $headers[] = $_SERVER["SERVER_PROTOCOL"]." 410 Gone";
             }
         } elseif ($endpoint == 'verify_block_captcha') {
-            $check = $this->check_visual($_REQUEST['block_id'],
-                $_REQUEST['captcha_id'], $_REQUEST['code']);
+            $check = $this->check_visual($request['block_id'],
+                $request['captcha_id'], $request['code']);
             $content = ($check ? 'true' : 'false');
         } elseif ($endpoint == self::CALLBACK_CHECK) {
             $content = self::CALLBACK_OK;

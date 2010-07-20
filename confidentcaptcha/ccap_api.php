@@ -635,7 +635,7 @@ class CCAP_Api
     public function check_audio($block_id, $audio_id)
     {
         $resource = "/block/$block_id/audio/$audio_id";
-        $method = 'POST';
+        $method = 'GET';
         $params = NULL;
         $cred = FALSE;
 
