@@ -25,7 +25,7 @@
 					</div>
 	<div class="info-box-body">
         		<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Access functions for the Confident CAPTCHA API</p>
+<p class="short-description">Interface for the Confident CAPTCHA API</p>
 <p class="description"><p>The Confident CAPTCHA API, with documentation, is found at:  <a href="http://captcha.confidenttechnologies.com">http://captcha.confidenttechnologies.com</a></p></p>
 		<p class="notes">
 			Located in <a class="field" href="_ccap_api.php.html">/ccap_api.php</a> (line <span class="field"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a166">166</a></span>)
@@ -317,7 +317,7 @@
 		<span class="var-title">
 			<span class="var-type">string</span>
 			<span class="var-name">$library_version</span>
-						(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a236">236</a></span>)
+						(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a238">238</a></span>)
 		</span>
 	</div>
 
@@ -325,6 +325,7 @@
 <p class="short-description">Version of this library</p>
 <p class="description"><p>A version string such as 20100621_PHP_1, passed as library_version in  each API call.</p><p>The first part, 20100621_, tells the Confident CAPTCHA server that  you expect the server to use the June 21st, 2010 version of the API.  There are only a few recognized values, and using an unrecognized  value is undefined.</p><p>The combined 20100621_PHP is used to determine if the library is  supported.  For a list of supported libraries, see  <a href="http://captcha.confidenttechnologies.com/version">the version XML returned from the server</a>.  Contact Confident Technologies to add your own library to the list.</p><p>Everything after this is ignored by the API, and can be used for  versioning your library.  This may be useful for diagnosing issues -  if a known bad library_version appears in request, we can contact the  customer to request them to update their library.</p></p>
 	<ul class="tags">
+				<li><span class="field">todo:</span> Make this true - The end part of the version string   (20100621_PHP_ENDPART) is not currently ignored</li>
 				<li><span class="field">access:</span> protected</li>
 			</ul>
 	
@@ -400,7 +401,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Constructor.png" />
-		<span class="method-title">Constructor __construct</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a256">256</a></span>)
+		<span class="method-title">Constructor __construct</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a258">258</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -449,7 +450,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">call</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a313">313</a></span>)
+		<span class="method-title">call</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a315">315</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -489,7 +490,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">check_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a633">633</a></span>)
+		<span class="method-title">check_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a635">635</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -522,7 +523,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">check_captcha</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a728">728</a></span>)
+		<span class="method-title">check_captcha</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a730">730</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -558,7 +559,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">check_credentials</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a438">438</a></span>)
+		<span class="method-title">check_credentials</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a440">440</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -584,7 +585,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">check_onekey</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a793">793</a></span>)
+		<span class="method-title">check_onekey</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a795">795</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -615,7 +616,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">check_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a560">560</a></span>)
+		<span class="method-title">check_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a562">562</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -653,7 +654,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">create_block</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a462">462</a></span>)
+		<span class="method-title">create_block</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a464">464</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -680,7 +681,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">create_captcha</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a680">680</a></span>)
+		<span class="method-title">create_captcha</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a682">682</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -728,7 +729,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">create_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a500">500</a></span>)
+		<span class="method-title">create_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a502">502</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -778,7 +779,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">get_user_info</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a379">379</a></span>)
+		<span class="method-title">get_user_info</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a381">381</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -805,7 +806,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">prep_req</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a279">279</a></span>)
+		<span class="method-title">prep_req</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a281">281</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -845,11 +846,11 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">shortcut</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a362">362</a></span>)
+		<span class="method-title">shortcut</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a364">364</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Fake a call the Confident CAPTCHA API</p>
+<p class="short-description">Create a shortcut response, faking a call the Confident CAPTCHA API</p>
 <p class="description"><p>This is used when a parameter is unset or known, and a failed  response can be generated without bothering the CAPTCHA server.  It is enabled by setting $use_shortcut.</p></p>
 	<ul class="tags">
 				<li><span class="field">return:</span> The response</li>
@@ -892,7 +893,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">start_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a601">601</a></span>)
+		<span class="method-title">start_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a603">603</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -927,7 +928,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">start_onekey</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a765">765</a></span>)
+		<span class="method-title">start_onekey</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a767">767</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -960,7 +961,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">version</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a448">448</a></span>)
+		<span class="method-title">version</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_api.php.html#a450">450</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -987,7 +988,7 @@
 
 	
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 20 Jul 2010 13:33:08 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Tue, 20 Jul 2010 15:36:17 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</div></body>
 </html>

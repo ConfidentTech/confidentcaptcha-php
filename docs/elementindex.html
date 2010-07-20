@@ -201,7 +201,7 @@
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_Policy.html#methodcallback">CCAP_Policy::callback()</a> in ccap_policy.php</div>
-							<div class="index-item-description">Provide the callback function</div>
+							<div class="index-item-description">Handle asynchronous callbacks</div>
 					</dd>
 			<dt class="field">
 						<img src="media/images/Class Constant.png" alt="Class Constant" title="Class Constant" />
@@ -225,7 +225,7 @@
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_Policy.html#methodcallback_extensions">CCAP_Policy::callback_extensions()</a> in ccap_policy.php</div>
-							<div class="index-item-description">Provide extended callback functions</div>
+							<div class="index-item-description">Entrypoint for derived classes to provide extended callback functions</div>
 					</dd>
 			<dt class="field">
 						<img src="media/images/Class Constant.png" alt="Class Constant" title="Class Constant" />
@@ -249,7 +249,7 @@
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_Api.html">CCAP_Api</a> in ccap_api.php</div>
-							<div class="index-item-description">Access functions for the Confident CAPTCHA API</div>
+							<div class="index-item-description">Interface for the Confident CAPTCHA API</div>
 					</dd>
 			<dt class="field">
 						<img src="media/images/Page.png" alt="Page" title="Page" />
@@ -313,7 +313,7 @@
 							<div class="index-item-description">Session-based persistence for Confident CAPTCHA Policies</div>
 					</dd>
 			<dt class="field">
-						<img src="media/images/AbstractClass.png" alt="Class" title="Class" />
+						<img src="media/images/Class.png" alt="Class" title="Class" />
 			CCAP_Policy
 					</dt>
 		<dd class="index-item-body">
@@ -418,7 +418,7 @@
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_Policy.html#methodcheck_form">CCAP_Policy::check_form()</a> in ccap_policy.php</div>
-							<div class="index-item-description">Check a form submission, including instant authentication state</div>
+							<div class="index-item-description">Check a form submission, pulling parameters out of the request and  checking for instant authentication.</div>
 					</dd>
 			<dt class="field">
 						<img src="media/images/Method.png" alt="Method" title="Method" />
@@ -466,7 +466,7 @@
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_Policy.html#methodcreate_block">CCAP_Policy::create_block()</a> in ccap_policy.php</div>
-							<div class="index-item-description">Create a multiple-CAPTCHA block</div>
+							<div class="index-item-description">Create a multiple-CAPTCHA block on the CAPTCHA API server</div>
 					</dd>
 			<dt class="field">
 						<img src="media/images/Method.png" alt="Method" title="Method" />
@@ -531,6 +531,14 @@
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_ApiResponse.html#var$from_remote">CCAP_ApiResponse::$from_remote</a> in ccap_api.php</div>
 							<div class="index-item-description">True if response from CAPTCHA API server, false if shortcut used</div>
+					</dd>
+			<dt class="field">
+						<img src="media/images/Class Constant.png" alt="Class Constant" title="Class Constant" />
+			FAIL_MESSAGE
+					</dt>
+		<dd class="index-item-body">
+			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_ProductionFailClosed.html#constFAIL_MESSAGE">CCAP_ProductionFailClosed::FAIL_MESSAGE</a> in ccap_prod_closed_policy.php</div>
+							<div class="index-item-description">HTML message on failure</div>
 					</dd>
 		</dl>
 	<a name="g"></a>
@@ -738,7 +746,7 @@
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_PersistSession.html#methodpolicy_name">CCAP_PersistSession::policy_name()</a> in ccap_persist.php</div>
-							<div class="index-item-description">Get stored policy name</div>
+							<div class="index-item-description">Get the stored policy name from the SESSION</div>
 					</dd>
 			<dt class="field">
 						<img src="media/images/Method.png" alt="Method" title="Method" />
@@ -778,7 +786,7 @@
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_Policy.html#methodreset">CCAP_Policy::reset()</a> in ccap_policy.php</div>
-							<div class="index-item-description">Reset to clean state</div>
+							<div class="index-item-description">Reset to initial state, discarding any current CAPTCHA</div>
 					</dd>
 			<dt class="field">
 						<img src="media/images/AbstractMethod.png" alt="Method" title="Method" />
@@ -914,7 +922,7 @@
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="confidentcaptcha-php/CCAP_Api.html#methodshortcut">CCAP_Api::shortcut()</a> in ccap_api.php</div>
-							<div class="index-item-description">Fake a call the Confident CAPTCHA API</div>
+							<div class="index-item-description">Create a shortcut response, faking a call the Confident CAPTCHA API</div>
 					</dd>
 			<dt class="field">
 						<img src="media/images/Method.png" alt="Method" title="Method" />

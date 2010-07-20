@@ -115,17 +115,21 @@
 <li><div class="src-line"><a name="a102"></a><span class="src-sym">{</span></div></li>
 <li><div class="src-line"><a name="a103"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-doc">/**</span></div></li>
 <li><div class="src-line"><a name="a104"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Respond&nbsp;with&nbsp;success&nbsp;if&nbsp;captcha&nbsp;creation&nbsp;failed</span></div></li>
-<li><div class="src-line"><a name="a105"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/</span></div></li>
-<li><div class="src-line"><a name="a106"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">protected&nbsp;</span><span class="src-key">function&nbsp;</span><a href="../confidentcaptcha-php/CCAP_ProductionFailOpen.html#methodrespond_check_visual">respond_check_visual</a><span class="src-sym">(</span><span class="src-var">$response</span><span class="src-sym">)</span></div></li>
-<li><div class="src-line"><a name="a107"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">{</span></div></li>
-<li><div class="src-line"><a name="a108"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-sym">(</span><span class="src-var">$this</span><span class="src-sym">-&gt;</span><a href="../confidentcaptcha-php/CCAP_Policy.html#var$visual_authenticated">visual_authenticated</a>&nbsp;===&nbsp;<span class="src-id">TRUE&nbsp;</span><span class="src-key">or</span></div></li>
-<li><div class="src-line"><a name="a109"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$this</span><span class="src-sym">-&gt;</span><a href="../confidentcaptcha-php/CCAP_Policy.html#var$visual_creation_succeeded">visual_creation_succeeded</a>&nbsp;===&nbsp;<span class="src-id">FALSE</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
-<li><div class="src-line"><a name="a110"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
-<li><div class="src-line"><a name="a111"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a105"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</span></div></li>
+<li><div class="src-line"><a name="a106"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;</span><span class="src-doc-coretag">@param&nbsp;</span><span class="src-doc-type">CCAP_ApiResponse&nbsp;</span><span class="src-doc-var">$response&nbsp;</span><span class="src-doc">The&nbsp;response&nbsp;from&nbsp;</span><span class="src-doc-inlinetag">{@link&nbsp;CCAP_Api}</span></div></li>
+<li><div class="src-line"><a name="a107"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;</span><span class="src-doc-coretag">@return&nbsp;</span><span class="src-doc-type">boolean&nbsp;</span><span class="src-doc">TRUE&nbsp;if&nbsp;CAPTCHA&nbsp;creation&nbsp;failed,&nbsp;else&nbsp;result&nbsp;of&nbsp;visual</span></div></li>
+<li><div class="src-line"><a name="a108"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;authentication</span></div></li>
+<li><div class="src-line"><a name="a109"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/</span></div></li>
+<li><div class="src-line"><a name="a110"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">protected&nbsp;</span><span class="src-key">function&nbsp;</span><a href="../confidentcaptcha-php/CCAP_ProductionFailOpen.html#methodrespond_check_visual">respond_check_visual</a><span class="src-sym">(</span><span class="src-var">$response</span><span class="src-sym">)</span></div></li>
+<li><div class="src-line"><a name="a111"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a112"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-sym">(</span><span class="src-var">$this</span><span class="src-sym">-&gt;</span><a href="../confidentcaptcha-php/CCAP_Policy.html#var$visual_authenticated">visual_authenticated</a>&nbsp;===&nbsp;<span class="src-id">TRUE&nbsp;</span><span class="src-key">or</span></div></li>
+<li><div class="src-line"><a name="a113"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$this</span><span class="src-sym">-&gt;</span><a href="../confidentcaptcha-php/CCAP_Policy.html#var$visual_creation_succeeded">visual_creation_succeeded</a>&nbsp;===&nbsp;<span class="src-id">FALSE</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a114"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a115"></a><span class="src-sym">}</span></div></li>
 </ol></div>
 </div>
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 20 Jul 2010 13:33:10 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Tue, 20 Jul 2010 15:36:19 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</body>
 </html>

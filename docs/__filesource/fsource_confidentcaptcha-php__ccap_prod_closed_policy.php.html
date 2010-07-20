@@ -115,32 +115,40 @@
 <li><div class="src-line"><a name="a102"></a><span class="src-key">class&nbsp;</span><a href="../confidentcaptcha-php/CCAP_ProductionFailClosed.html">CCAP_ProductionFailClosed</a>&nbsp;<span class="src-key">extends&nbsp;</span><a href="../confidentcaptcha-php/CCAP_Policy.html">CCAP_Policy</a></div></li>
 <li><div class="src-line"><a name="a103"></a><span class="src-sym">{</span></div></li>
 <li><div class="src-line"><a name="a104"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-doc">/**</span></div></li>
-<li><div class="src-line"><a name="a105"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;On&nbsp;creation&nbsp;failure,&nbsp;tell&nbsp;the&nbsp;user&nbsp;that&nbsp;the&nbsp;form&nbsp;is&nbsp;broken</span></div></li>
-<li><div class="src-line"><a name="a106"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</span></div></li>
-<li><div class="src-line"><a name="a107"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;It&nbsp;is&nbsp;better&nbsp;for&nbsp;the&nbsp;site&nbsp;owner&nbsp;to&nbsp;examine&nbsp;$visual_creation_succeeded,</span></div></li>
-<li><div class="src-line"><a name="a108"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;and&nbsp;display&nbsp;an&nbsp;error&nbsp;message&nbsp;instead&nbsp;of&nbsp;the&nbsp;form.&nbsp;&nbsp;This&nbsp;is&nbsp;a&nbsp;backup,</span></div></li>
-<li><div class="src-line"><a name="a109"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;in&nbsp;case&nbsp;the&nbsp;site&nbsp;owner&nbsp;is&nbsp;quickly&nbsp;switching&nbsp;and&nbsp;doesn't&nbsp;have&nbsp;time&nbsp;to</span></div></li>
-<li><div class="src-line"><a name="a110"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;change&nbsp;the&nbsp;page&nbsp;logic&nbsp;cleanly.</span></div></li>
-<li><div class="src-line"><a name="a111"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</span></div></li>
-<li><div class="src-line"><a name="a112"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;</span><span class="src-doc-coretag">@param&nbsp;</span><span class="src-doc-type">CCAP_ApiResponse&nbsp;</span><span class="src-doc-var">$response&nbsp;</span><span class="src-doc">The&nbsp;response&nbsp;from&nbsp;</span><span class="src-doc-inlinetag">{@link&nbsp;CCAP_Api}</span></div></li>
-<li><div class="src-line"><a name="a113"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;</span><span class="src-doc-coretag">@return&nbsp;</span><span class="src-doc-type">string&nbsp;</span><span class="src-doc">HTML&nbsp;to&nbsp;inject&nbsp;into&nbsp;the&nbsp;page</span></div></li>
-<li><div class="src-line"><a name="a114"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/</span></div></li>
-<li><div class="src-line"><a name="a115"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">protected&nbsp;</span><span class="src-key">function&nbsp;</span><a href="../confidentcaptcha-php/CCAP_ProductionFailClosed.html#methodrespond_create_visual">respond_create_visual</a><span class="src-sym">(</span><span class="src-var">$response</span><span class="src-sym">)</span></div></li>
-<li><div class="src-line"><a name="a116"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">{</span></div></li>
-<li><div class="src-line"><a name="a117"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if&nbsp;</span><span class="src-sym">(</span><span class="src-var">$response</span><span class="src-sym">-&gt;</span><span class="src-id">status&nbsp;</span>==&nbsp;<span class="src-num">200</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
-<li><div class="src-line"><a name="a118"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-var">$response</span><span class="src-sym">-&gt;</span><span class="src-id">body</span><span class="src-sym">;</span></div></li>
-<li><div class="src-line"><a name="a119"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">elseif&nbsp;</span><span class="src-sym">(</span><span class="src-sym">!</span><span class="src-var">$this</span><span class="src-sym">-&gt;</span><a href="../confidentcaptcha-php/CCAP_Policy.html#var$visual_creation_succeeded">visual_creation_succeeded</a><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
-<li><div class="src-line"><a name="a120"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-str">&quot;&lt;p&gt;CAPTCHA&nbsp;creation&nbsp;failed.&nbsp;&nbsp;Please&nbsp;try&nbsp;again&nbsp;later.&lt;/p&gt;&quot;</span><span class="src-sym">;</span></div></li>
-<li><div class="src-line"><a name="a121"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
-<li><div class="src-line"><a name="a122"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-str">&quot;&quot;</span><span class="src-sym">;</span></div></li>
-<li><div class="src-line"><a name="a123"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
-<li><div class="src-line"><a name="a124"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
-<li><div class="src-line"><a name="a125"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
-<li><div class="src-line"><a name="a126"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a105"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;HTML&nbsp;message&nbsp;on&nbsp;failure</span></div></li>
+<li><div class="src-line"><a name="a106"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;</span><span class="src-doc-coretag">@var&nbsp;</span><span class="src-doc-type">string&nbsp;</span></div></li>
+<li><div class="src-line"><a name="a107"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/</span></div></li>
+<li><div class="src-line"><a name="a108"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">const&nbsp;</span><a href="../confidentcaptcha-php/CCAP_ProductionFailClosed.html#constFAIL_MESSAGE">FAIL_MESSAGE</a>&nbsp;=&nbsp;</div></li>
+<li><div class="src-line"><a name="a109"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-str">'&lt;p&gt;CAPTCHA&nbsp;creation&nbsp;failed.&nbsp;&nbsp;Please&nbsp;try&nbsp;again&nbsp;later.&lt;/p&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a110"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a111"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a112"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-doc">/**</span></div></li>
+<li><div class="src-line"><a name="a113"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;On&nbsp;creation&nbsp;failure,&nbsp;tell&nbsp;the&nbsp;user&nbsp;that&nbsp;the&nbsp;form&nbsp;is&nbsp;broken</span></div></li>
+<li><div class="src-line"><a name="a114"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</span></div></li>
+<li><div class="src-line"><a name="a115"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;It&nbsp;is&nbsp;better&nbsp;for&nbsp;the&nbsp;site&nbsp;owner&nbsp;to&nbsp;examine&nbsp;$visual_creation_succeeded,</span></div></li>
+<li><div class="src-line"><a name="a116"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;and&nbsp;display&nbsp;an&nbsp;error&nbsp;message&nbsp;instead&nbsp;of&nbsp;the&nbsp;form.&nbsp;&nbsp;This&nbsp;is&nbsp;a&nbsp;backup,</span></div></li>
+<li><div class="src-line"><a name="a117"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;in&nbsp;case&nbsp;the&nbsp;site&nbsp;owner&nbsp;is&nbsp;quickly&nbsp;switching&nbsp;and&nbsp;doesn't&nbsp;have&nbsp;time&nbsp;to</span></div></li>
+<li><div class="src-line"><a name="a118"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;change&nbsp;the&nbsp;page&nbsp;logic&nbsp;cleanly.</span></div></li>
+<li><div class="src-line"><a name="a119"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</span></div></li>
+<li><div class="src-line"><a name="a120"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;</span><span class="src-doc-coretag">@param&nbsp;</span><span class="src-doc-type">CCAP_ApiResponse&nbsp;</span><span class="src-doc-var">$response&nbsp;</span><span class="src-doc">The&nbsp;response&nbsp;from&nbsp;</span><span class="src-doc-inlinetag">{@link&nbsp;CCAP_Api}</span></div></li>
+<li><div class="src-line"><a name="a121"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;</span><span class="src-doc-coretag">@return&nbsp;</span><span class="src-doc-type">string&nbsp;</span><span class="src-doc">HTML&nbsp;to&nbsp;inject&nbsp;into&nbsp;the&nbsp;page</span></div></li>
+<li><div class="src-line"><a name="a122"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/</span></div></li>
+<li><div class="src-line"><a name="a123"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">protected&nbsp;</span><span class="src-key">function&nbsp;</span><a href="../confidentcaptcha-php/CCAP_ProductionFailClosed.html#methodrespond_create_visual">respond_create_visual</a><span class="src-sym">(</span><span class="src-var">$response</span><span class="src-sym">)</span></div></li>
+<li><div class="src-line"><a name="a124"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a125"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if&nbsp;</span><span class="src-sym">(</span><span class="src-var">$response</span><span class="src-sym">-&gt;</span><span class="src-id">status&nbsp;</span>==&nbsp;<span class="src-num">200</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a126"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-var">$response</span><span class="src-sym">-&gt;</span><span class="src-id">body</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a127"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">elseif&nbsp;</span><span class="src-sym">(</span><span class="src-sym">!</span><span class="src-var">$this</span><span class="src-sym">-&gt;</span><a href="../confidentcaptcha-php/CCAP_Policy.html#var$visual_creation_succeeded">visual_creation_succeeded</a><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a128"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-id">self</span><span class="src-sym">::</span><span class="src-id">FAIL_MESSAGE</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a129"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a130"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-str">&quot;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a131"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a132"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a133"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a134"></a><span class="src-sym">}</span></div></li>
 </ol></div>
 </div>
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 20 Jul 2010 13:33:10 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Tue, 20 Jul 2010 15:36:19 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</body>
 </html>

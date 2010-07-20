@@ -25,9 +25,9 @@
 	<div class="info-box-body">
         		<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Session-based persistence for Confident CAPTCHA Policies</p>
-<p class="description"><p>Use PHP's $_SESSION to store Confident CAPTCHA state</p></p>
+<p class="description"><p>Uses PHP's $_SESSION to store Confident CAPTCHA state.  All functions  require a session.  Either call session_start() at the top of a PHP  page that will use CAPTCHA, or, better yet, call  CCAP_Policy-&gt;start_captcha_page() at the top of the PHP page,  before any output or headers are sent.</p></p>
 		<p class="notes">
-			Located in <a class="field" href="_ccap_persist.php.html">/ccap_persist.php</a> (line <span class="field"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a180">180</a></span>)
+			Located in <a class="field" href="_ccap_persist.php.html">/ccap_persist.php</a> (line <span class="field"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a194">194</a></span>)
 		</p>
 		
 				
@@ -94,7 +94,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">load</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a187">187</a></span>)
+		<span class="method-title">load</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a200">200</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -131,13 +131,13 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">policy_name</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a207">207</a></span>)
+		<span class="method-title">policy_name</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a220">220</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Get stored policy name</p>
+<p class="short-description">Get the stored policy name from the SESSION</p>
 	<ul class="tags">
-				<li><span class="field">return:</span> The policy class name</li>
+				<li><span class="field">return:</span> The policy class name, or NULL if none stored</li>
 				<li><span class="field">access:</span> public</li>
 			</ul>
 	
@@ -163,7 +163,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">reset</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a252">252</a></span>)
+		<span class="method-title">reset</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a265">265</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -199,7 +199,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">save</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a225">225</a></span>)
+		<span class="method-title">save</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a238">238</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -251,7 +251,7 @@
 
 	
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 20 Jul 2010 13:33:09 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Tue, 20 Jul 2010 15:36:17 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</div></body>
 </html>

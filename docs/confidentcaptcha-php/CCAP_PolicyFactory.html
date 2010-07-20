@@ -26,7 +26,7 @@
 	<div class="info-box-body">
         		<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Policy factory for Confident CAPTCHA policies</p>
-<p class="description"><p>When recreating a policy with the help of the persistence engine, it is  sometimes useful to create a policy by name.</p></p>
+<p class="description"><p>When recreating a policy with the help of the persistence engine, this  class can be used to create or restore a policy by class name.</p></p>
 		<p class="notes">
 			Located in <a class="field" href="_ccap_policy_factory.php.html">/ccap_policy_factory.php</a> (line <span class="field"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy_factory.php.html#a90">90</a></span>)
 		</p>
@@ -97,9 +97,9 @@
 									</div>
 																<div class="method-definition">
 					<img src="../media/images/StaticMethod.png" alt=" "/>
-											static <span class="method-result">void</span>
+											static <span class="method-result">boolean</span>
 										<a href="#known" title="details" class="method-name">known</a>
-											(<span class="var-type"></span>&nbsp;<span class="var-name">$policy_name</span>)
+											(<span class="var-type">string</span>&nbsp;<span class="var-name">$policy_name</span>)
 									</div>
 																<div class="method-definition">
 					<img src="../media/images/StaticMethod.png" alt=" "/>
@@ -191,7 +191,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/StaticMethod.png" />
-		<span class="method-title">static add</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy_factory.php.html#a136">136</a></span>)
+		<span class="method-title">static add</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy_factory.php.html#a139">139</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -224,7 +224,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/StaticMethod.png" />
-		<span class="method-title">static create</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy_factory.php.html#a153">153</a></span>)
+		<span class="method-title">static create</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy_factory.php.html#a156">156</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -286,27 +286,28 @@
 	
 	<div class="method-header">
 		<img src="../media/images/StaticMethod.png" />
-		<span class="method-title">static known</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy_factory.php.html#a124">124</a></span>)
+		<span class="method-title">static known</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy_factory.php.html#a127">127</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Does the factory know about a policy?</p>
 	<ul class="tags">
+				<li><span class="field">return:</span> TRUE if known, FALSE if unknown</li>
 				<li><span class="field">access:</span> public</li>
 			</ul>
 	
 	<div class="method-signature">
-		<span class="method-result">void</span>
+		<span class="method-result">boolean</span>
 		<span class="method-name">
 			known
 		</span>
-					(<span class="var-type"></span>&nbsp;<span class="var-name">$policy_name</span>)
+					(<span class="var-type">string</span>&nbsp;<span class="var-name">$policy_name</span>)
 			</div>
 	
 			<ul class="parameters">
 					<li>
-				<span class="var-type"></span>
-				<span class="var-name">$policy_name</span>			</li>
+				<span class="var-type">string</span>
+				<span class="var-name">$policy_name</span><span class="var-description">: The name of the policy</span>			</li>
 				</ul>
 		
 			
@@ -316,14 +317,14 @@
 	
 	<div class="method-header">
 		<img src="../media/images/StaticMethod.png" />
-		<span class="method-title">static restore</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy_factory.php.html#a178">178</a></span>)
+		<span class="method-title">static restore</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy_factory.php.html#a181">181</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Recreate a policy with the help of the persistence framework.</p>
 <p class="description"><p>If the persistance framework doesn't have a stored policy name, then  the $fallback_policy_name is used to create the policy.  If this is  unset, die() is called.</p></p>
 	<ul class="tags">
-				<li><span class="field">return:</span> The restored polcy or a new fallback policy</li>
+				<li><span class="field">return:</span> The restored policy or a new fallback policy</li>
 				<li><span class="field">access:</span> public</li>
 			</ul>
 	
@@ -355,7 +356,7 @@
 
 	
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 20 Jul 2010 13:33:10 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Tue, 20 Jul 2010 15:36:18 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</div></body>
 </html>

@@ -9,9 +9,9 @@
 		</head>
 		<body>
 			<div class="page-body">			
-<h2 class="class-name"><img src="../media/images/AbstractClass_logo.png"
-														alt="Abstract Class"
-														title="Abstract Class"
+<h2 class="class-name"><img src="../media/images/Class_logo.png"
+														alt=" Class"
+														title=" Class"
 														style="vertical-align: middle"> CCAP_Policy</h2>
 
 <a name="sec-description"></a>
@@ -29,12 +29,12 @@
 	<div class="info-box-body">
         		<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Policy interface for the Confident CAPTCHA API</p>
-<p class="description"><p>In most cases, the web site will call the Confident CAPTCHA API and use the  returned data.  However, if something goes wrong, such as failed API  credentials or the site is unavailable due to maintenance, then the status  of the API call and the web site policy will determine what happens.  This  class provides the policy interface, so that the website code can stay the  same when the policy is switched.</p></p>
-	<ul class="tags">
-				<li><span class="field">abstract:</span> </li>
-			</ul>
+<p class="description"><p>In normal siutations, the web server will: <ul><li>Call the Confident CAPTCHA API to create a CAPTCHA, and inject the
+   returned HTML into the page,</li><li>(Optionally) Use a callback to check a user's CAPTCHA solution with the
+   Confident CAPTCHA API immediately after they try it, and</li><li>At form submission, check with the Confident CAPTCHA API that the user
+   correctly solved the CAPTCHA.</li></ul>  However, if something goes wrong, such as failed API credentials or the  site is unavailable due to maintenance, then things get more complicated.  This policy interface takes care of the details of failed connections,  so that Confident CAPTCHA 'just works'.</p><p>There are state variables that allow the website developer to handle error  cases themselves, as well as customization points so that a derived class  can encapsulate the site policy, and different policies can be used on  different pages with a one-line change.</p><p>We don't recommend using this class directly, but instead using one of the  provided derived classes, or create your own derived policy.</p></p>
 		<p class="notes">
-			Located in <a class="field" href="_ccap_policy.php.html">/ccap_policy.php</a> (line <span class="field"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a95">95</a></span>)
+			Located in <a class="field" href="_ccap_policy.php.html">/ccap_policy.php</a> (line <span class="field"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a109">109</a></span>)
 		</p>
 		
 				
@@ -398,7 +398,7 @@
 		<span class="var-title">
 			<span class="var-type"><a href="../confidentcaptcha-php/CCAP_Api.html">CCAP_Api</a></span>
 			<span class="var-name">$api</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a101">101</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a115">115</a></span>)
 		</span>
 	</div>
 
@@ -421,13 +421,13 @@
 		<span class="var-title">
 			<span class="var-type">integer</span>
 			<span class="var-name">$api_debug_level</span>
-			 = <span class="var-default"> 0</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a111">111</a></span>)
+			 = <span class="var-default"> 0</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a125">125</a></span>)
 		</span>
 	</div>
 
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Debug Level for API calls</p>
-<p class="description"><p><ol><li>- No debugging</li><li>- Only exceptions (non-200s)</li><li>- All API calls</li></ol></p></p>
+<p class="description"><p><ul><li>0: No debugging</li><li>1: Only exceptions (non-200s)</li><li>2: All API calls</li></ul></p></p>
 	<ul class="tags">
 				<li><span class="field">access:</span> public</li>
 			</ul>
@@ -445,7 +445,7 @@
 		<span class="var-title">
 			<span class="var-type">boolean</span>
 			<span class="var-name">$audio_authenticated</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a207">207</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a227">227</a></span>)
 		</span>
 	</div>
 
@@ -468,7 +468,7 @@
 		<span class="var-title">
 			<span class="var-type">boolean</span>
 			<span class="var-name">$audio_creation_succeeded</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a201">201</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a221">221</a></span>)
 		</span>
 	</div>
 
@@ -491,7 +491,7 @@
 		<span class="var-title">
 			<span class="var-type">string</span>
 			<span class="var-name">$audio_id</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a213">213</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a233">233</a></span>)
 		</span>
 	</div>
 
@@ -514,12 +514,13 @@
 		<span class="var-title">
 			<span class="var-type">boolean</span>
 			<span class="var-name">$block_done</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a129">129</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a149">149</a></span>)
 		</span>
 	</div>
 
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Visual CAPTCHA - No more CAPTCHAs can be created with this block</p>
+<p class="description"><p>When the callback is used, a user gets instant feedback if their  guess is correct, and has a chance to try again.  They don't get  unlimited chances - eventually the API server will respond 430 GONE.  When that happens, this boolean is TRUE.</p></p>
 	<ul class="tags">
 				<li><span class="field">access:</span> public</li>
 			</ul>
@@ -537,7 +538,7 @@
 		<span class="var-title">
 			<span class="var-type">string</span>
 			<span class="var-name">$block_id</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a123">123</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a137">137</a></span>)
 		</span>
 	</div>
 
@@ -560,7 +561,7 @@
 		<span class="var-title">
 			<span class="var-type">string</span>
 			<span class="var-name">$callback_url</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a219">219</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a239">239</a></span>)
 		</span>
 	</div>
 
@@ -583,7 +584,7 @@
 		<span class="var-title">
 			<span class="var-type">string</span>
 			<span class="var-name">$code_color</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a177">177</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a197">197</a></span>)
 		</span>
 	</div>
 
@@ -607,7 +608,7 @@
 		<span class="var-title">
 			<span class="var-type">string</span>
 			<span class="var-name">$display_style</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a137">137</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a157">157</a></span>)
 		</span>
 	</div>
 
@@ -631,7 +632,7 @@
 		<span class="var-title">
 			<span class="var-type">integer</span>
 			<span class="var-name">$height</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a153">153</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a173">173</a></span>)
 		</span>
 	</div>
 
@@ -655,7 +656,7 @@
 		<span class="var-title">
 			<span class="var-type">boolean</span>
 			<span class="var-name">$include_audio</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a145">145</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a165">165</a></span>)
 		</span>
 	</div>
 
@@ -679,7 +680,7 @@
 		<span class="var-title">
 			<span class="var-type">integer</span>
 			<span class="var-name">$length</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a169">169</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a189">189</a></span>)
 		</span>
 	</div>
 
@@ -703,7 +704,7 @@
 		<span class="var-title">
 			<span class="var-type"><a href="../confidentcaptcha-php/CCAP_Persistence.html">CCAP_Persistence</a></span>
 			<span class="var-name">$persist</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a117">117</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a131">131</a></span>)
 		</span>
 	</div>
 
@@ -726,7 +727,7 @@
 		<span class="var-title">
 			<span class="var-type">boolean</span>
 			<span class="var-name">$visual_authenticated</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a189">189</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a209">209</a></span>)
 		</span>
 	</div>
 
@@ -749,7 +750,7 @@
 		<span class="var-title">
 			<span class="var-type">boolean</span>
 			<span class="var-name">$visual_creation_succeeded</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a183">183</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a203">203</a></span>)
 		</span>
 	</div>
 
@@ -772,7 +773,7 @@
 		<span class="var-title">
 			<span class="var-type">string</span>
 			<span class="var-name">$visual_id</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a195">195</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a215">215</a></span>)
 		</span>
 	</div>
 
@@ -795,7 +796,7 @@
 		<span class="var-title">
 			<span class="var-type">integer</span>
 			<span class="var-name">$width</span>
-			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a161">161</a></span>)
+			 = <span class="var-default"> NULL</span>			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a181">181</a></span>)
 		</span>
 	</div>
 
@@ -832,7 +833,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Constructor.png" />
-		<span class="method-title">Constructor __construct</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a239">239</a></span>)
+		<span class="method-title">Constructor __construct</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a259">259</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -873,11 +874,11 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">callback</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a854">854</a></span>)
+		<span class="method-title">callback</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a893">893</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Provide the callback function</p>
+<p class="short-description">Handle asynchronous callbacks</p>
 	<ul class="tags">
 				<li><span class="field">return:</span> First element is content, second is array of headers</li>
 				<li><span class="field">access:</span> public</li>
@@ -907,12 +908,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">callback_extensions</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a898">898</a></span>)
+		<span class="method-title">callback_extensions</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a937">937</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Provide extended callback functions</p>
-<p class="description"><p>Return NULL if you can't handle the callback either.</p></p>
+<p class="short-description">Entrypoint for derived classes to provide extended callback functions</p>
+<p class="description"><p>Derived classes should return NULL on unknown functions</p></p>
 	<ul class="tags">
 				<li><span class="field">return:</span> First element is content, second is array of headers</li>
 				<li><span class="field">access:</span> protected</li>
@@ -950,11 +951,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">call_api</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a416">416</a></span>)
+		<span class="method-title">call_api</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a443">443</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Call an API function</p>
+<p class="description"><p>This awkward function is used so that API calls can be optionally  logged for debugging purposes.</p></p>
 	<ul class="tags">
 				<li><span class="field">access:</span> protected</li>
 			</ul>
@@ -975,7 +977,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">check_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a763">763</a></span>)
+		<span class="method-title">check_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a799">799</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -1009,7 +1011,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">check_config</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a258">258</a></span>)
+		<span class="method-title">check_config</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a282">282</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -1040,11 +1042,11 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">check_form</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a831">831</a></span>)
+		<span class="method-title">check_form</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a870">870</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Check a form submission, including instant authentication state</p>
+<p class="short-description">Check a form submission, pulling parameters out of the request and  checking for instant authentication.</p>
 	<ul class="tags">
 				<li><span class="field">return:</span> TRUE if authenticated</li>
 				<li><span class="field">access:</span> public</li>
@@ -1071,7 +1073,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">check_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a638">638</a></span>)
+		<span class="method-title">check_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a667">667</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -1108,11 +1110,11 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">create_block</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a504">504</a></span>)
+		<span class="method-title">create_block</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a533">533</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Create a multiple-CAPTCHA block</p>
+<p class="short-description">Create a multiple-CAPTCHA block on the CAPTCHA API server</p>
 	<ul class="tags">
 				<li><span class="field">access:</span> protected</li>
 			</ul>
@@ -1133,12 +1135,11 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">create_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a534">534</a></span>)
+		<span class="method-title">create_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a560">560</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Create HTML for a visual CAPTCHA</p>
-<p class="description"><p>If 'multiple' is chosen (recommended), then a block is created as  needed, and the block_id is stored in <a href="../confidentcaptcha-php/CCAP_Policy.html#var$block_id">$block_id</a>.</p></p>
 	<ul class="tags">
 				<li><span class="field">return:</span> HTML fragment to inject into page</li>
 				<li><span class="field">access:</span> public</li>
@@ -1183,7 +1184,7 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">generate_debug</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a438">438</a></span>)
+		<span class="method-title">generate_debug</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a465">465</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -1219,12 +1220,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">handle_debug</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a472">472</a></span>)
+		<span class="method-title">handle_debug</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a500">500</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Handle a debug statement</p>
-<p class="description"><p>The default implementation does nothing</p></p>
+<p class="description"><p>The default implementation does nothing.  You can override to send to  a log file, send an email to developers, or something else.</p></p>
 	<ul class="tags">
 				<li><span class="field">access:</span> protected</li>
 			</ul>
@@ -1258,12 +1259,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">reset</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a481">481</a></span>)
+		<span class="method-title">reset</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a510">510</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Reset to clean state</p>
-<p class="description"><p>Should be called after a CAPTCHA session</p></p>
+<p class="short-description">Reset to initial state, discarding any current CAPTCHA</p>
+<p class="description"><p>This should be called after a CAPTCHA has been checked and the form  accepted or rejected.</p></p>
 	<ul class="tags">
 				<li><span class="field">access:</span> public</li>
 			</ul>
@@ -1284,11 +1285,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">respond_check_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a820">820</a></span>)
+		<span class="method-title">respond_check_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a858">858</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Create the response boolean for check_audio</p>
+<p class="description"><p>Derived classes may want to change the response on API failures.</p></p>
 	<ul class="tags">
 				<li><span class="field">return:</span> TRUE if authenticated</li>
 				<li><span class="field">access:</span> protected</li>
@@ -1315,11 +1317,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">respond_check_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a689">689</a></span>)
+		<span class="method-title">respond_check_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a720">720</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Create the response boolean for check_visual</p>
+<p class="description"><p>Derived classes may want to change the response on API failures.</p></p>
 	<ul class="tags">
 				<li><span class="field">return:</span> TRUE if authenticated</li>
 				<li><span class="field">access:</span> protected</li>
@@ -1354,11 +1357,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">respond_create_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a746">746</a></span>)
+		<span class="method-title">respond_create_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a782">782</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Create the response XML for start_audio</p>
+<p class="description"><p>Derived classes may want to modify the HTML, or perform different  actions on API failures</p></p>
 	<ul class="tags">
 				<li><span class="field">return:</span> Audio response XML</li>
 				<li><span class="field">access:</span> protected</li>
@@ -1385,11 +1389,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">respond_create_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a620">620</a></span>)
+		<span class="method-title">respond_create_visual</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a649">649</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Create the response HTML for create_visual</p>
+<p class="description"><p>Derived classes may want to modify the HTML, or perform different  actions on API failures</p></p>
 	<ul class="tags">
 				<li><span class="field">return:</span> HTML to inject into the page</li>
 				<li><span class="field">access:</span> protected</li>
@@ -1424,12 +1429,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">start_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a704">704</a></span>)
+		<span class="method-title">start_audio</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a737">737</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Start an audio CAPTCHA</p>
-<p class="description"><p>If $block_id is set, then it will be used.  Otherwise, it will be a  single audio CAPTCHA</p></p>
+<p class="description"><p>If $block_id is set, then it will be used.  Otherwise, a new block  will be created.</p></p>
 	<ul class="tags">
 				<li><span class="field">return:</span> Audio response XML</li>
 				<li><span class="field">access:</span> public</li>
@@ -1446,10 +1451,10 @@
 			<ul class="parameters">
 					<li>
 				<span class="var-type">string</span>
-				<span class="var-name">$phone_number</span><span class="var-description">: US phone number with area code</span>			</li>
+				<span class="var-name">$phone_number</span><span class="var-description">: US phone number with area code, such as                               9185551234</span>			</li>
 					<li>
 				<span class="var-type">string</span>
-				<span class="var-name">$block_id</span><span class="var-description">: Block ID from form, or NULL to generate</span>			</li>
+				<span class="var-name">$block_id</span><span class="var-description">: Block ID from form, or NULL to generate a                               new block ID</span>			</li>
 				</ul>
 		
 			
@@ -1459,11 +1464,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">start_captcha_page</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a248">248</a></span>)
+		<span class="method-title">start_captcha_page</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a272">272</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Start a page containing CAPTCHA</p>
+<p class="description"><p>When using CCAP_PersistSession for persistence, this will  call session_start() if needed, and load the previous CAPTCHA  state.</p></p>
 	<ul class="tags">
 				<li><span class="field">access:</span> public</li>
 			</ul>
@@ -1506,7 +1512,7 @@
 		<span class="const-title">
 			<span class="const-name">CALLBACK_CHECK</span>
 			 = <span class="const-default"> 'callback_check'</span>
-			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a225">225</a></span>)
+			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a245">245</a></span>)
 		</span>
 	</div>
 
@@ -1523,7 +1529,7 @@
 		<span class="const-title">
 			<span class="const-name">CALLBACK_OK</span>
 			 = <span class="const-default"> 'The callback is working'</span>
-			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a231">231</a></span>)
+			(line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_policy.php.html#a251">251</a></span>)
 		</span>
 	</div>
 
@@ -1537,7 +1543,7 @@
 	</div>
 	
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 20 Jul 2010 13:33:10 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Tue, 20 Jul 2010 15:36:18 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</div></body>
 </html>

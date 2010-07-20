@@ -25,9 +25,9 @@
 	<div class="info-box-body">
         		<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">&quot;Do Nothing&quot; as persistance strategy.</p>
-<p class="description"><p>Used for stateless Confident CAPTCHA.  Restricts you to single-CAPTCHA  method and forms that fail when the CAPTCHA server fails.  Not recommended,  but it is a good starting place for your own persistance implementation,  or if you want to handle persistance yourself (for example, storing the  CCAP_Policy instance in the session).</p></p>
+<p class="description"><p>Used for stateless Confident CAPTCHA.  This restricts you to delayed  CAPTCHA validation, and means forms will fail when the CAPTCHA server  fails.  This class is not recommended for general use, but it is a good  for a quick API credentials check, or as a starting place for your own  persistance implementation, or if you want to handle persistance yourself  (for example, storing the CCAP_Policy instance in the session).</p></p>
 		<p class="notes">
-			Located in <a class="field" href="_ccap_persist.php.html">/ccap_persist.php</a> (line <span class="field"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a134">134</a></span>)
+			Located in <a class="field" href="_ccap_persist.php.html">/ccap_persist.php</a> (line <span class="field"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a135">135</a></span>)
 		</p>
 		
 				
@@ -94,11 +94,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">load</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a141">141</a></span>)
+		<span class="method-title">load</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a144">144</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Initialize the policy state from persistance store</p>
+<p class="description"><p>The null policy doesn't load anything.</p></p>
 	<ul class="tags">
 				<li><span class="field">var:</span> The policy instance to initialize</li>
 				<li><span class="field">access:</span> public</li>
@@ -131,11 +132,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">policy_name</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a149">149</a></span>)
+		<span class="method-title">policy_name</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a155">155</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Get stored policy name</p>
+<p class="description"><p>The null policy doesn't store the policy name, so return is NULL.</p></p>
 	<ul class="tags">
 				<li><span class="field">return:</span> The policy class name</li>
 				<li><span class="field">access:</span> public</li>
@@ -163,11 +165,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">reset</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a168">168</a></span>)
+		<span class="method-title">reset</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a178">178</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Clear the policy state in persistance store</p>
+<p class="description"><p>The null policy is already clear.</p></p>
 	<ul class="tags">
 				<li><span class="field">var:</span> The policy instance to clear</li>
 				<li><span class="field">access:</span> public</li>
@@ -200,11 +203,12 @@
 	
 	<div class="method-header">
 		<img src="../media/images/Method.png" />
-		<span class="method-title">save</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a159">159</a></span>)
+		<span class="method-title">save</span> (line <span class="line-number"><a href="../__filesource/fsource_confidentcaptcha-php__ccap_persist.php.html#a167">167</a></span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
 <p class="short-description">Save the policy state to persistance store</p>
+<p class="description"><p>The null policy doesn't save anything.</p></p>
 	<ul class="tags">
 				<li><span class="field">var:</span> The policy instance to save</li>
 				<li><span class="field">access:</span> public</li>
@@ -252,7 +256,7 @@
 
 	
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 20 Jul 2010 13:33:09 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
+		Documentation generated on Tue, 20 Jul 2010 15:36:17 -0500 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.3</a>
 	</p>
 	</div></body>
 </html>
