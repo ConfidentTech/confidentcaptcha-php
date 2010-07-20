@@ -343,6 +343,30 @@ class CCAP_Api
         curl_close($ch);
         return $response;
     }
+    
+    /**
+     * Fake a call the Confident CAPTCHA API
+     *
+     * This is used when a parameter is unset or known, and a failed
+     * response can be generated without bothering the CAPTCHA server
+     *
+     * @param string  $resource        The resource to call
+     * @param string  $method          The HTTP method to use (POST or GET)
+     * @param array   $params          The parameters to send
+     * @param boolean $use_credentials Include API credentials in call
+     * @param integer $status          The status to return
+     * @param string  $body            The body to return
+     * @return CCAP_ApiResponse  The response
+     */
+    protected function fake_call($resource, $method, $params, 
+        $use_credentials, $status, $body)
+    {
+        $req = $this->prep_req($resource, $method, $params, $use_credentials);
+        $url = $req['url'];
+        $form = $req['form'];
+        return new CCAP_ApiResponse($status, $body, 
+            strtoupper($method), $url, $form, FALSE);
+    }
 
     /**
      * Get the user's IP address and User Agent
@@ -443,12 +467,9 @@ class CCAP_Api
 
         if ($this->use_shortcuts) {
             if (!$this->api_credentials_set()) {
-                // If API Credentials are unset, then call will fail w/ 401
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(401,
-                    "<p><b>401 Not Authorized</b>(API credentials unset,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    401, "<p><b>401 Not Authorized</b>(API credentials".
+                    " unset, shortcut used).</p>");
             }
         }
 
@@ -462,7 +483,8 @@ class CCAP_Api
      * CAPTCHA that has a low probability of randomly guessing.  Some
      * acceptable values are 3x3 w/ length 4, or 4x4 w/ length 3.
      *
-     * @param string  $block_id      Block ID returned from {@link create_block()}
+     * @param string  $block_id      Block ID returned from 
+     *                               {@link create_block()}
      * @param string  $display_style 'flyout' or 'lightbox'
      * @param boolean $include_audio Include audio CAPTCHA (if enabled)
      * @param integer $height        Height of visual CAPTCHA in pictures
@@ -504,19 +526,16 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($block_id)) {
                 // If block_id is unset, the call will fail with 404
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(404,
-                    "<p><b>404 Not Found</b>(block_id is empty,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    404, "<p><b>404 Not Found</b>(block_id is empty,".
+                    " shortcut used).</p>");
             }
 
             $check = $this->check_visual_settings($params);
             if (!is_null($check)) {
                 // Visual Settings are bad, will result in 400
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(400, $check, $method, $req['url'],
-                    $req['form'], FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    400, $check);
             }
         }
 
@@ -547,23 +566,18 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($block_id)) {
                 // If block_id is unset, the call will fail with 404
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(404,
-                    "<p><b>404 Not Found</b>(block_id is empty,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    404, "<p><b>404 Not Found</b>(block_id is empty,".
+                    " shortcut used).</p>");
             } elseif (empty($visual_id)) {
                 // If visual_id is unset, the call will fail with 404
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(404,
-                    "<p><b>404 Not Found</b>(visual_id is empty,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    404, "<p><b>404 Not Found</b>(visual_id is empty,".
+                    " shortcut used).</p>");
             } elseif (empty($code)) {
                 // If the code is unset, the call will fail with 200, False
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(200,
-                    "False", $method, $req['url'], $req['form'], FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    200, "False");
             }
         }
 
@@ -576,7 +590,8 @@ class CCAP_Api
      * Audio CAPTCHA must be enabled for your account.  Only US numbers
      * are currently supported.
      *
-     * @param string $block_id     Block ID returned from {@link create_block()}
+     * @param string $block_id     Block ID returned from 
+     *                             {@link create_block()}
      * @param string $phone_number User's 10-digit US phone number
      *
      * @return CCAP_ApiResponse If successful, status is 200 and
@@ -592,18 +607,14 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($block_id)) {
                 // If block_id is unset, the call will fail with 404
-                $req = $this->prep_req($resource, $method, $params, FALSE);
-                return new CCAP_ApiResponse(404,
-                    "<p><b>404 Not Found</b>(block_id is empty,".
-                    "shortcut used).</p>", $method, $req['url'],
-                    $req['form'], FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    404, "<p><b>404 Not Found</b>(block_id is empty,".
+                    " shortcut used).</p>");
             } elseif (empty($phone_number)) {
                 // If the phone number is unset, the call will fail with 400
-                $url = $this->prep_req($resource, $method, $params, FALSE);
-                return new CCAP_ApiResponse(400,
-                    "<p><b>404 Not Found</b>(phone_number is empty,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    400, "<p><b>404 Not Found</b>(phone_number is empty,".
+                    " shortcut used).</p>");
             }
         }
 
@@ -628,18 +639,14 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($block_id)) {
                 // If block_id is unset, the call will fail with 404
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(404,
-                    "<p><b>404 Not Found</b>(block_id is empty,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred, 
+                    404, "<p><b>404 Not Found</b>(block_id is empty,".
+                    " shortcut used).</p>");
             } elseif (empty($audio_id)) {
                 // If audio_id is unset, the call will fail with 404
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(404,
-                    "<p><b>404 Not Found</b>(audio_id is empty,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred, 
+                    404, "<p><b>404 Not Found</b>(audio_id is empty,".
+                    " shortcut used).</p>");
             }
         }
 
@@ -658,7 +665,8 @@ class CCAP_Api
      * @deprecated Prefer {@link create_block()} / {@link create_visual()}
      *
      * @param string  $display_style 'flyout' or 'lightbox'
-     * @param boolean $include_audio Include audio CAPTCHA (if enabled for site)
+     * @param boolean $include_audio Include audio CAPTCHA (if enabled for
+     *                               site)
      * @param integer $height        Height of visual CAPTCHA in pictures
      * @param integer $width         Width of visual CAPTCHA in pictures
      * @param integer $length        Number of pictures the user must pick
@@ -690,9 +698,8 @@ class CCAP_Api
             $check = $this->check_visual_settings($params);
             if (!is_null($check)) {
                 // Visual Settings are bad, will result in 400
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(400, $check, $method, $req['url'],
-                    $req['form'], FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    400, $check);
             }
         }
 
@@ -727,16 +734,13 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($captcha_id)) {
                 // If captcha_id is unset, the call will fail with 404
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(404,
-                    "<p><b>404 Not Found</b>(captcha_id is empty,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    404, "<p><b>404 Not Found</b>(captcha_id is empty,".
+                    " shortcut used).</p>");
             } elseif (empty($code)) {
                 // If the code is unset, the call will fail with 200, False
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(200,
-                    "False", $method, $req['url'], $req['form'], FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    200, "False");
             }
         }
 
@@ -767,11 +771,9 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($phone_number)) {
                 // If the phone number is unset, the call will fail with 400
-                $req = $this->prep_req($resource, $method, $params, FALSE);
-                return new CCAP_ApiResponse(400,
-                    "<p><b>404 Not Found</b>(phone_number is empty,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    400, "<p><b>404 Not Found</b>(phone_number is empty,".
+                    " shortcut used).</p>");
             }
         }
 
@@ -797,11 +799,9 @@ class CCAP_Api
         if ($this->use_shortcuts) {
             if (empty($onekey_id)) {
                 // If onekey_id is unset, the call will fail with 404
-                $req = $this->prep_req($resource, $method, $params, $cred);
-                return new CCAP_ApiResponse(404,
-                    "<p><b>404 Not Found</b>(onekey_id is empty,".
-                    "shortcut used).</p>", $method, $req['url'], $req['form'],
-                    FALSE);
+                return $this->fake_call($resource, $method, $params, $cred,
+                    404, "<p><b>404 Not Found</b>(onekey_id is empty,".
+                    " shortcut used).</p>");
             }
         }
 

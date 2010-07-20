@@ -63,13 +63,11 @@ if (empty($fail_sim)) {
             $use_credentials)
         {
             if ($use_credentials) {
-                $req = $this->prep_req($resource, $method, $params, TRUE);
-                $url = $req['url'];
-                $form = $req['form'];
-                $response = new CCAP_ApiResponse(401, 'Not Authorized (Fake)',
-                    strtoupper($method), $url, $form, FALSE);
+                $response = $this->fake_call($resource, $method, $params,
+                    $use_credentials, 401, 'Not Authorized (Fake)');
             } else {
-                $response = parent::call($resource, $method, $params, TRUE);
+                $response = parent::call($resource, $method, $params, 
+                    $use_credentials);
             }
             return $response;
         }
@@ -85,14 +83,8 @@ if (empty($fail_sim)) {
         protected function call($resource, $method, $params, 
             $use_credentials)
         {
-            $req = $this->prep_req($resource, $method, $params, 
-                $use_credentials);
-            $url = $req['url'];
-            $form = $req['form'];
-            $response = new CCAP_ApiResponse(0,
-                'Server not responding (fake)', strtoupper($method), $url,
-                $form, FALSE);
-            return $response;
+            return $this->fake_call($resource, $method, $params,
+                $use_credentials, 0, 'Server not responding (fake)');
         }
     }
     $ccap_api = new CCAP_ApiDead(
@@ -201,7 +193,7 @@ if (!in_array($code_color, $valid_colors)) $code_color= NULL;
 function url($extra = NULL)
 {
     global $display_style, $include_audio, $height, $width, $length,
-        $code_color, $policy, $settings_good, $fail_si;
+        $code_color, $policy, $settings_good, $fail_sim;
 
     $p = array();
     if ($settings_good) $p['ccap_settings_good'] = $settings_good;

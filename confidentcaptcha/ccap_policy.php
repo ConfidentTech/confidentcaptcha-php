@@ -79,6 +79,7 @@ If licensed under the Simplified BSD License:
  * @version   20100621_PHP_2
  */
 
+
 /**
  * Policy interface for the Confident CAPTCHA API
  *
@@ -520,7 +521,7 @@ $d_body";
      * needed, and the block_id is stored in {@link $block_id}.
      *
      * @param string  $callback_url  The callback URL for instant feedback,
-     *    or NULL for delayed feedback.
+     *                               or NULL for delayed feedback.
      * @param string  $display_style 'flyout' or 'lightbox'
      * @param boolean $include_audio Include audio CAPTCHA (if enabled)
      * @param integer $height        Height of visual CAPTCHA in pictures

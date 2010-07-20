@@ -34,13 +34,13 @@ The samples are:
 </p>
 <ul>
   <li><a href="check.php">check.php</a> - Check if your
-    configuration is supported by Confident CAPTCHA.</li>
+    configuration is supported by Confident CAPTCHA</li>
   <li><a href="explore.php">explore.php</a> - Try out Confident CAPTCHA options</li>
   <li><a href="sample_before.php">sample_before.php</a> - A sample form before
     adding Confident CAPTCHA</li>
   <li><a href="sample_after.php">sample_after.php</a> - A sample form after adding Confident CAPTCHA</li>
 </ul>
-<p>You can also read the <a href="docs/index.html">library reference</a></p>
+<p>You can also read the <a href="docs/index.html">library reference</a>.</p>
 
 <?php } else /* credentials not good */ { ?>
 
