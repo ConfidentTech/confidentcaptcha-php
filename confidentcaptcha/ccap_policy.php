@@ -581,6 +581,11 @@ $d_body";
             if (!is_null($length)) $this->length = $length;
             if (!is_null($code_color)) $this->code_color = $code_color;
             if (!is_null($callback_url)) $this->callback_url = $callback_url;
+            
+            // Can't do audio without a callback
+            if ($this->include_audio and !$this->callback_url) {
+                $this->include_audio = FALSE;
+            }
         
             // Create the visual CAPTCHA
             $response = $this->call_api('create_visual', $this->block_id,

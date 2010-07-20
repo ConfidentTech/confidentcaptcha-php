@@ -471,6 +471,7 @@ $good_index_template = $header_template . <<<TEMPLATE
   </li>
   <li><a href="{AT_POST_URL}">Delayed Verification CAPTCHA Method</a> -
     CAPTCHA is checked after form submission, and the user gets one chance.
+    Audio CAPTCHA not supported.
   </li>
  </ul>
  {NEW_SETTINGS_FORM}
