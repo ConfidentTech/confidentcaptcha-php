@@ -258,7 +258,7 @@ class CCAP_Api
     public function __construct($customer_id, $site_id, $api_username,
         $api_password,
         $captcha_server_url = 'http://captcha.confidenttechnologies.com',
-        $library_version = '20100621_PHP', $use_shortcuts = FALSE)
+        $library_version = '20100621_PHP_1.1', $use_shortcuts = FALSE)
     {
         $this->customer_id = $customer_id;
         $this->site_id = $site_id;
