@@ -329,8 +329,7 @@ class CCAP_Policy
         } elseif (empty($url)) {
             $url = $not_set;
             $url_supported = 'No';
-        } elseif ((0 == substr_compare($url, 'http', 0, 4)) and
-                  (substr($url, -1) == '/')) {
+        } elseif (0 == substr_compare($url, 'http', 0, 4)) {
             $url_supported = 'Maybe';
         } else {
             $url_supported = 'No';
@@ -396,9 +395,9 @@ class CCAP_Policy
         $local_ok = TRUE;
         foreach($local_config as $row) {
             $local .= '<tr><td>'.implode('</td><td>', $row)."</td></tr>\n";
-            if (end($row) == 'No')
-                $local_ok = FALSE;
+            if (end($row) == 'No') $local_ok = FALSE;
         }
+        
         $local .= '</table>';
 
         # Add callback check button
