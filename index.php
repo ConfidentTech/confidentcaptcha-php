@@ -45,8 +45,9 @@ The samples are:
 <?php } else /* credentials not good */ { ?>
 
 <p>
-Your credentials in <tt>config.php</tt> are <b>not</b>valid.  Please edit
-<tt>config.php</tt> and add your API credentials.  If you do not have an
+Your credentials in <tt>config.php</tt> are <b>not</b> valid.  See 
+<a href="check.php">check.php</a> for details.  Please edit
+<tt>config.php</tt> and add or fix your API credentials.  If you do not have an
 account yet, please 
 <a href="http://www.confidenttechnologies.com/purchase">
 sign up for a free account
