@@ -25,7 +25,6 @@ If licensed under GNU GPL v2.0 or later:
  <http://www.gnu.org/licenses/>.
 
 If licensed under the Simplified BSD License:
-If licensed under the Simplified BSD License:
  Copyright 2010 Confident Technologies, Inc. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
