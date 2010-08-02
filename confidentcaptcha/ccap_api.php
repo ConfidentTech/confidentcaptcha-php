@@ -231,8 +231,6 @@ class CCAP_Api
      * customer to request them to update their library.
      * 
      * @var string
-     * @todo Make this true - The end part of the version string
-     *  (20100621_PHP_ENDPART) is not currently ignored
      */
     protected $library_version;
 
