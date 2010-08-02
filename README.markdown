@@ -65,23 +65,23 @@ VERSION HISTORY
 ---------------
 
  - 20100610_PHP - June 10th, 2010
-  * Original (versioned) release
+     * Original (versioned) release
 
  - 20100621_PHP - June 21st, 2010
-  * Updated to work with API version 20100610
-  * Support the new namespaced HTML and JavaScript elements
-  * CAPTCHA parameters are stored in session, so that similar CAPTCHA can be
-    created on callback
-  * Sample implements "fail open" strategy - Forms work even when there are
-    configuration or server issues.
+     * Updated to work with API version 20100610
+     * Support the new namespaced HTML and JavaScript elements
+     * CAPTCHA parameters are stored in session, so that similar CAPTCHA can be
+       created on callback
+     * Sample implements "fail open" strategy - Forms work even when there are
+       configuration or server issues.
 
  - 20100621_PHP_1.1 - August 2nd, 2010
-  * Massive refactor of the PHP code, including changing variable names for
-    better integration with existing code.
-  * Library code has been moved to the confidentcaptcha subdirectory, and has
-    been refactored into several classes.  New policy classes help handle
-    normal and abnormal API responses.
-  * The sample code has been expanded into several files.
-  * PHPDocumentor comments have been added to the the library, and generated
-    documentation is included in the download package.
+     * Massive refactor of the PHP code, including changing variable names for
+       better integration with existing code.
+     * Library code has been moved to the confidentcaptcha subdirectory, and has
+       been refactored into several classes.  New policy classes help handle
+       normal and abnormal API responses.
+     * The sample code has been expanded into several files.
+     * PHPDocumentor comments have been added to the the library, and generated
+       documentation is included in the download package.
 
