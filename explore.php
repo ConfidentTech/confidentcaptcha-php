@@ -125,13 +125,23 @@ if (empty($policy)) {
 $ccap_policy = CCAP_PolicyFactory::create($used_policy, $ccap_api,
     $ccap_persist);
 
+
+function option_get($key) {
+    if (isset($_REQUEST["ccap_$key"])) {
+        return $_REQUEST["ccap_$key"];
+    } elseif (isset($ccap_options[$key])) {
+        return $ccap_options[$key];
+    } else {
+        return NULL;
+    }
+}
 // Load CAPTCHA parameters
-$display_style = array_get($_REQUEST, 'ccap_display');
-$include_audio = array_get($_REQUEST, 'ccap_include_audio');
-$height = array_get($_REQUEST, 'ccap_height');
-$width = array_get($_REQUEST, 'ccap_width');
-$length = array_get($_REQUEST, 'ccap_length');
-$code_color = array_get($_REQUEST, 'ccap_code_color');
+$display_style = option_get('display_style');
+$include_audio = option_get('include_audio');
+$height = option_get('height');
+$width = option_get('width');
+$length = option_get('length');
+$code_color = option_get('code_color');
 
 // Calculate CAPTCHA strength
 function factorial ($x) 
@@ -197,7 +207,7 @@ function url($extra = NULL)
 
     $p = array();
     if ($settings_good) $p['ccap_settings_good'] = $settings_good;
-    if (!empty($display_style)) $p['ccap_display'] = $display_style;
+    if (!empty($display_style)) $p['ccap_display_style'] = $display_style;
     if (!is_null($include_audio)) $p['ccap_include_audio'] = $include_audio;
     if (!empty($height)) $p['ccap_height'] = $height;
     if (!empty($width)) $p['ccap_width'] = $width;
@@ -324,9 +334,13 @@ function captcha_page($with_callback, $ccap_policy)
     // On both POST and GET, Generate new CAPTCHA HTML
     $ccap_policy->reset();
     $callback_url = ($with_callback) ? $ccap_callback_url : NULL;
-    $captcha_html = $ccap_policy->create_visual($callback_url,
-        $display_style, $include_audio, $height, $width, $length,
-        $code_color);
+    $captcha_html = $ccap_policy->create_visual($callback_url, array(
+        'display_style' => $display_style,
+        'include_audio' => $include_audio,
+        'height' => $height,
+        'width' => $width,
+        'length' => $length,
+        'code_color' => $code_color));
 
     // Insert the Confident CAPTCHA into page template
     if ($with_callback) {
@@ -398,7 +412,7 @@ function new_settings_form()
     $fail_sublist = settings_sublist($valid_fail_sims, $fail_sim,
         'ccap_fail_sim');
     $display_sublist = settings_sublist($valid_display_styles,
-        $display_style, 'ccap_display');
+        $display_style, 'ccap_display_style');
     
     $audio_options = Array(
         '' => 'Use default of no audio',

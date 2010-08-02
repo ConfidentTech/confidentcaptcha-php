@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 // Start a new Confident CAPTCHA on every page load
 $ccap_policy->reset();
-$ccap_captcha = $ccap_policy->create_visual($ccap_callback_url);
+$ccap_captcha = $ccap_policy->create_visual($ccap_callback_url, $ccap_options);
 
 // Show the form on GET or POST   
 echo <<<HTML

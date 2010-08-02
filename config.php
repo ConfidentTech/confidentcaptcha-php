@@ -14,13 +14,57 @@ $ccap_api_settings = array(
 $ccap_server_url = 'http://captcha.confidenttechnologies.com/';
 
 /* The path to the callback function, used in the multiple CAPTCHA method.
- *
  * If you place callback.php in the same folder as the form that contains
  * Confident CAPTCHA, then the relative URL of 'callback.php' will work.
  * If you place the Confident CAPTCHA library files in a different folder,
  * you'll need a full URL path like '/confident/callback.php'
  */
 $ccap_callback_url = 'callback.php';
+
+/* Default CAPTCHA options
+ *
+ */
+$ccap_options = array(
+    /**
+     * Visual CAPTCHA - Display style ('flyout' or 'lightbox')
+     * If unset, the CAPTCHA API server defaults to 'lightbox'
+     */
+    // 'display_style' => 'lightbox',
+
+    /**
+     * Visual CAPTCHA - Include the audio CAPTCHA alternative (if enabled)
+     * If unset, the CAPTCHA API server defaults to FALSE
+     */
+    // 'include_audio' => FALSE,
+
+    /**
+     * Visual CAPTCHA - Height in pictures
+     * If unset, the CAPTCHA API server defaults to 3
+     */
+    // 'height' => 3,
+
+    /**
+     * Visual CAPTCHA - Width in pictures
+     * If unset, the CAPTCHA API server defaults to 3
+     */
+    // 'width' => 3,
+
+    /**
+     * Visual CAPTCHA - Number of pictures the user has to select
+     * If unset, the CAPTCHA API server defaults to 4
+     */
+    // 'length' => 4,
+
+    /**
+     * Visual CAPTCHA - The color of the letter code on pictures
+     * Valid values are 'White', 'Red', 'Orange', 'Yellow', 'Green', 'Teal',
+     * 'Blue', 'Indigo', 'Violet', and 'Gray'.
+     * If unset, the CAPTCHA API server defaults to 'White'
+     */
+    // 'code_color' => 'White',
+
+); // end $ccap_options
+
 
 /* The name of the default policy
  * 

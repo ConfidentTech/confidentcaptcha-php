@@ -22,7 +22,8 @@ $ccap_persist = new CCAP_PersistNull();
 $policy = 'CCAP_ProductionFailOpen';
 $ccap_policy = CCAP_PolicyFactory::create($policy, $ccap_api, $ccap_persist);
 $ccap_policy->reset();
-$check_config_response = $ccap_policy->check_config($ccap_callback_url);
+$check_config_response = $ccap_policy->check_config($ccap_callback_url,
+    $ccap_options);
 $check_config_html = $check_config_response['html'];
 $config_good = $check_config_response['passed'];
 if ($config_good) {

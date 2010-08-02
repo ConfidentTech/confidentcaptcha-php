@@ -277,9 +277,12 @@ class CCAP_Policy
     /**
      * Check local and remote configuration
      *
+     * @param string $callback_url - Callback URL for audio, instant feedback
+     * @param array $options - CAPTCHA options
+     *
      * @return array with keys 'html' (HTML string) and 'passed' (boolean)
      */
-    public function check_config($callback_url)
+    public function check_config($callback_url = NULL, $options = NULL)
     {
         // Local checks
         $local_config = array(array("Item", "Value",
@@ -338,54 +341,64 @@ class CCAP_Policy
             $url_supported);
 
         // Check API parameters
-        $customer_id = $this->api->customer_id;
-        if (empty($customer_id)) {
-            $customer_id = $not_set;
-            $customer_id_ok = 'No';
-        } else {
-            $customer_id_ok = 'Yes';
+        $api_params = array('customer_id', 'site_id', 'api_username', 
+            'api_password');
+        foreach ($api_params as $param_name) {
+            $param = $this->api->$param_name;
+            if (empty($param)) {
+                $param = $not_set;
+                $param_ok = 'No';
+            } else {
+                $param_ok = 'Yes';
+            }
+            $local_config[] = array($param_name, $param, '(some value)',
+                $param_ok);
         }
-        $local_config[] = array('customer_id', $customer_id, '(some value)',
-            $customer_id_ok);
-
-        $site_id = $this->api->site_id;
-        if (empty($site_id)) {
-            $site_id = $not_set;
-            $site_id_ok = 'No';
+        
+        // Check Callback URL
+        if (isset($callback_url)) {
+            $callback = $callback_url;
         } else {
-            $site_id_ok = 'Yes';
+            $callback = $this->callback_url;
         }
-        $local_config[] = array('site_id', $site_id, '(some value)',
-            $site_id_ok);
-
-        $api_username = $this->api->api_username;
-        if (empty($api_username)) {
-            $api_username = $not_set;
-            $api_username_ok = 'No';
+        if (isset($callback)) {
+            if (file_exists($callback)) {
+                $callback_ok = 'Yes';
+            } else {
+                $callback_ok = 'No';
+            }
         } else {
-            $api_username_ok = 'Yes';
+            $callback_ok = 'Somewhat (audio, instant feedback disabled)';
         }
-        $local_config[] = array('api_username', $api_username, '(some value)',
-            $api_username_ok);
-
-        $api_password = $this->api->api_password;
-        if (empty($api_password)) {
-            $api_password = $not_set;
-            $api_password_ok = 'No';
-        } else {
-            $api_password_ok = 'Yes';
+        $local_config[] = array('ccap_callback_url', $callback, 
+            '(local path or not set)', $callback_ok);
+        
+        // Check CAPTCHA options
+        $known_options = array(
+            'display_style' => '(optional, default "lightbox")',
+            'include_audio' => '(optional, default FALSE)',
+            'height' => '(optional, default 3)',
+            'width' => '(optional, default 3)',
+            'length' => '(optional, default 4)',
+            'code_color' => '(optional, default "White")'
+        );
+        foreach ($known_options as $option_name => $expected) {
+            if (isset($options[$option_name])) {
+                $option = $options[$option_name];
+            } else {
+                $option = $this->$option_name;
+            }
+            if (is_null($option)) {
+                $option = $not_set;
+                $required = ('(optional' != substr($expected, 0, 9));
+                $option_ok = ($required) ? 'No' : 'Yes';
+            } else {
+                // TODO: Should I validate the option?
+                $option_ok = 'Probably';
+            }
+            $local_config[] = array($option_name, $option, $expected,
+                $option_ok);
         }
-        $local_config[] = array('api_password', $api_password, '(some value)',
-            $api_password_ok);
-
-        if (empty($callback_url)) {
-            $callback_url = $not_set;
-            $callback_ok = 'No';
-        } else {
-            $callback_ok = 'Yes';
-        }
-        $local_config[] = array('callback_url', $callback_url,
-            "(Local URL)", $callback_ok);
 
         # Make local tables
         $local = "<h1>Local Configuration</h1>\n";
@@ -398,21 +411,23 @@ class CCAP_Policy
             if (end($row) == 'No') $local_ok = FALSE;
         }
         
-        $local .= '</table>';
+        $local .= '</table><br/>';
 
         # Add callback check button
         # TODO: Use javascript to check
         $ok = self::CALLBACK_OK;
-        $local .= "<br/>
-            <form name='callback_check' action='$callback_url' method='post'>
-            <input type='hidden' name='endpoint' value='callback_check' />
-            <input type='submit' value='Click to check the callback' />
-        </form>
-        <p>
-        Response to clicking above should be '$ok'.
-        </p>
-        ";
-        $local .= "<br/>\n<h1>Remote Configuration</h1>\n";
+        if ($callback_url) {
+            $local .= "<form name='callback_check' action='$callback_url'
+                    method='post'>
+                <input type='hidden' name='endpoint' value='callback_check' />
+                <input type='submit' value='Click to check the callback' />
+            </form>
+            <p>
+            Response to clicking above should be '$ok'.
+            </p>
+            ";
+        }
+        $local .= "\n<h1>Remote Configuration</h1>\n";
         
         // Check credentials with API server
         $response = $this->call_api('check_credentials');
@@ -545,20 +560,19 @@ $d_body";
     /**
      * Create HTML for a visual CAPTCHA
      *
-     * @param string  $callback_url  The callback URL for instant feedback,
-     *                               or NULL for delayed feedback.
-     * @param string  $display_style 'flyout' or 'lightbox'
-     * @param boolean $include_audio Include audio CAPTCHA (if enabled)
-     * @param integer $height        Height of visual CAPTCHA in pictures
-     * @param integer $width         Width of visual CAPTCHA in pictures
-     * @param integer $length        Number of pictures the user must pick
-     * @param integer $code_color    Color of letter code on pictures
+     * @param string $callback_url The callback URL for instant feedback,
+     *                             or NULL for delayed feedback
+     * @param array $options An array of CAPTCHA creation options, including:
+     *  - code_color:    Color of letter code on pictures
+     *  - display_style: 'flyout' or 'lightbox'
+     *  - height:        Height of visual CAPTCHA in pictures
+     *  - include_audio: Include audio CAPTCHA (if enabled)
+     *  - length:        Number of pictures the user must pick
+     *  - width:         Width of visual CAPTCHA in pictures
      *
      * @return string HTML fragment to inject into page
      */
-    public function create_visual($callback_url=NULL, $display_style=NULL, 
-        $include_audio=NULL, $height=NULL, $width=NULL, $length=NULL,
-        $code_color=NULL)
+    public function create_visual($callback_url = NULL, $options = NULL)
     {
         // Get a block_id if needed
         $block_failed = FALSE;
@@ -571,15 +585,20 @@ $d_body";
 
         if (!$block_failed) {
             // Store CAPTCHA creation parameters for future calls
-            if (!is_null($display_style)) 
-                $this->display_style = $display_style;
-            if (!is_null($include_audio)) 
-                $this->include_audio = $include_audio;
-            if (!is_null($height)) $this->height = $height;
-            if (!is_null($width)) $this->width = $width;
-            if (!is_null($length)) $this->length = $length;
-            if (!is_null($code_color)) $this->code_color = $code_color;
-            if (!is_null($callback_url)) $this->callback_url = $callback_url;
+            if (isset($callback_url)) $this->callback_url = $callback_url;
+            foreach ($options as $option => $value) {
+                switch ($option) {
+                    case 'display_style': $this->display_style = $value; break;
+                    case 'include_audio': $this->include_audio = $value; break;
+                    case 'height': $this->height = $value; break;
+                    case 'width': $this->width = $value; break;
+                    case 'length': $this->length = $value; break;
+                    case 'code_color': $this->code_color = $value; break;
+                    default: 
+                        trigger_error("Unknown CAPTCHA option '$option'",
+                            E_USER_WARNING);
+                }
+            }
             
             // Can't do audio without a callback
             if ($this->include_audio and !$this->callback_url) {
