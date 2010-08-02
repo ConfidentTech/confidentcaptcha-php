@@ -76,7 +76,7 @@ If licensed under the Simplified BSD License:
  * @copyright Copyright (c) 2010, Confident Technologies, Inc.
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU GPL v2.0 or later
  * @license   http://www.opensource.org/licenses/bsd-license.php Simplified BSD License
- * @version   20100621_PHP_2
+ * @version   20100621_PHP_1.1
  */
 
 
