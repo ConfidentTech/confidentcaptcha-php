@@ -45,21 +45,21 @@ FILES
  * docs - Generated documentation folder
  * callback.php - An AJAX callback page for instant feedback and audio CAPTCHAs. 
  * confidentcaptcha - The ConfidentCAPTCHA library code:
-  * ccap_api.php - Provides CCAP_Api, the direct interface to the CAPTCHA API.
-  * ccap_policy.php - Provides CCAP_Policy, which handles normal and abnormal
-    API responses.
-  * ccap_prod_closed_policy.php - Provides CCAP_ProductionFailClosed, which
-    stops forms when CAPTCHA creation fails (recommended for account creation
-    forms).
-  * ccap_prod_open_policy.php - Provides CCAP_ProductionFailOpen, which allows
-    forms to continue when CAPTCHA creation failsi.  Recommended for contact
-    forms).
-  * ccap_dev_policy.php - Provides CCAP_DevelopmentPolicy, a debug
-    implementation of CCAP_Policy.
-  * ccap_persist.php - Provides CCAP_PersistSession, which remembers CAPTCHA
-    state between pages loads.
-  * ccap_policy_factory.php - Provides name-based creation of CCAP_Policy
-    instances, used by CCAP_PersistSession to reload a policy.
+     * ccap_api.php - Provides CCAP_Api, the direct interface to the CAPTCHA API.
+     * ccap_policy.php - Provides CCAP_Policy, which handles normal and abnormal
+       API responses.
+     * ccap_prod_closed_policy.php - Provides CCAP_ProductionFailClosed, which
+       stops forms when CAPTCHA creation fails (recommended for account creation
+       forms).
+     * ccap_prod_open_policy.php - Provides CCAP_ProductionFailOpen, which allows
+       forms to continue when CAPTCHA creation failsi.  Recommended for contact
+       forms).
+     * ccap_dev_policy.php - Provides CCAP_DevelopmentPolicy, a debug
+       implementation of CCAP_Policy.
+     * ccap_persist.php - Provides CCAP_PersistSession, which remembers CAPTCHA
+       state between pages loads.
+     * ccap_policy_factory.php - Provides name-based creation of CCAP_Policy
+       instances, used by CCAP_PersistSession to reload a policy.
 
 VERSION HISTORY
 ---------------
