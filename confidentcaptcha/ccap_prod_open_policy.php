@@ -81,7 +81,7 @@ If licensed under the Simplified BSD License:
 /**
  * Include definition of {@link CCAP_Policy}
  */
-require_once("confidentcaptcha/ccap_policy.php");
+require_once("ccap_policy.php");
 
 /**
  * Confident CAPTCHA policy for production, server failures leave page open

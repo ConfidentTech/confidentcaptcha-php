@@ -109,11 +109,11 @@ class CCAP_PolicyFactory
         if (!CCap_PolicyFactory::$initialized) {
             CCap_PolicyFactory::$initialized = NULL;
             CCap_PolicyFactory::add('CCAP_ProductionFailOpen',
-                'confidentcaptcha/ccap_prod_open_policy.php');
+                'ccap_prod_open_policy.php');
             CCap_PolicyFactory::add('CCAP_ProductionFailClosed',
-                'confidentcaptcha/ccap_prod_closed_policy.php');
+                'ccap_prod_closed_policy.php');
             CCap_PolicyFactory::add('CCAP_DevelopmentPolicy',
-                'confidentcaptcha/ccap_dev_policy.php');
+                'ccap_dev_policy.php');
             CCap_PolicyFactory::$initialized = TRUE;
         }
     }
