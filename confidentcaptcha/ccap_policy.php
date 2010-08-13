@@ -282,7 +282,7 @@ class CCAP_Policy
      *
      * @return array with keys 'html' (HTML string) and 'passed' (boolean)
      */
-    public function check_config($callback_url = NULL, $options = NULL)
+    public function check_config($callback_url = NULL, $options = array())
     {
         // Local checks
         $local_config = array(array("Item", "Value",
