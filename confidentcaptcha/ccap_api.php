@@ -293,9 +293,9 @@ class CCAP_Api
 
         $form = NULL;
         if (strtoupper($method) == 'GET') {
-            $url .= '?' . http_build_query($params);
+            $url .= '?' . http_build_query($params, '', '&');
         } elseif (strtoupper($method) == 'POST' and $params) {
-            $form = http_build_query($params);
+            $form = http_build_query($params, '', '&');
         }
         return Array('url'=>$url, 'form'=>$form);
     }
