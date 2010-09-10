@@ -90,5 +90,6 @@ VERSION HISTORY
        better with complex layouts, like most frameworks
 
  - 20100910_PHP_1.2.1 - September 10th, 2010
-     * Fix error when create_visual is called without options.
      * Upgrade to server version 20100910
+     * Fix error when create_visual is called without options.
+     * In explore.php, setting grid size doesn't reset other options anymore
