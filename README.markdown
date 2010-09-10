@@ -88,3 +88,7 @@ VERSION HISTORY
  - 20100813_PHP_1.2 - August 13th, 2010
      * Added support for visual CAPTCHA display_style 'modal' - Should work
        better with complex layouts, like most frameworks
+
+ - 20100910_PHP_1.2.1 - September 10th, 2010
+     * Fix error when create_visual is called without options.
+     * Upgrade to server version 20100910
