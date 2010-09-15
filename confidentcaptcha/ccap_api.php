@@ -387,14 +387,14 @@ class CCAP_Api
             // IP directly from caller
             $ip=$_SERVER['REMOTE_ADDR'];
         } else {
-            $ip="";
+            $ip="(no ip)";
         }
 
         if (!empty($_SERVER['HTTP_USER_AGENT'])) {
             // User-Agent header
             $agent = $_SERVER['HTTP_USER_AGENT'];
         } else {
-            $agent = "";
+            $agent = "(no agent)";
         }
 
         return Array('ip_addr' => $ip, 'user_agent' => $agent);
