@@ -396,8 +396,15 @@ class CCAP_Api
         } else {
             $agent = "(no agent)";
         }
+        
+        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+            $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+        } else {
+            $lang = "(no language)";
+        }
 
-        return Array('ip_addr' => $ip, 'user_agent' => $agent);
+        return Array('ip_addr' => $ip, 'user_agent' => $agent,
+            'language' => $lang);
     }
 
     /**
