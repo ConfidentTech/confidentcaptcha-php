@@ -70,7 +70,7 @@ VERSION HISTORY
    * Add support for running Confident CAPTCHA on an HTTPS page
    * Upgrade to server version 20110315
    * Switch to ajax.googleapis.com CDN for jQuery, for better SSL support
-   * Added `$ccap\_curlopt\_cainfo` and `$ccap\_curlopt\_capath` for optional
+   * Added `$ccap_curlopt_cainfo` and `$ccap_curlopt_capath` for optional
      cURL validation of SSL chain.
 
  - 20100910\_PHP\_1.2.2 - September 22nd, 2010
