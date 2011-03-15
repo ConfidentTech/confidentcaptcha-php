@@ -1,13 +1,13 @@
 PHP Library and Sample Code for Confident CAPTCHA
 =================================================
-version 20100813\_PHP\_1.2.2 - September 22nd, 2010
+version 20110315\_PHP\_1.2.3 - March 15th, 2011
 
 Thank you for downloading this library and sample code.
 
 REQUIREMENTS
 ------------
 
- * This library requires PHP version 5.0 or later.
+ * This library requires PHP version 5.1 or later.
  * PHP must have cURL and SimpleXML support built in and enabled.
  * The page that renders the Confident CAPTCHA requires jQuery 1.4.2.
 
@@ -66,6 +66,13 @@ FILES
 
 VERSION HISTORY
 ---------------
+ - 20110315\_PHP\_1.2.3 - March 15th, 2010
+   * Add support for running Confident CAPTCHA on an HTTPS page
+   * Upgrade to server version 20110315
+   * Switch to ajax.googleapis.com CDN for jQuery, for better SSL support
+   * Added $ccap\_curlopt\_cainfo and $ccap\_curlopt\_capath for optional
+     cURL validation of SSL chain.
+
  - 20100910\_PHP\_1.2.2 - September 22nd, 2010
    * Send non-blank strings when user omits the `User Agent` header.  Before,
      a blank string was sent, which caused a `400 Bad Request` and triggered
