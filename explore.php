@@ -253,7 +253,7 @@ $header_template = <<<TEMPLATE
 <head runat="server">
     <title>{TITLE}</title>
     <script type='text/javascript'
-      src='http://code.jquery.com/jquery-1.4.2.min.js'></script>
+      src='//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
 </head>
 TEMPLATE;
 

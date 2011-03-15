@@ -255,7 +255,7 @@ class CCAP_Api
     public function __construct($customer_id, $site_id, $api_username,
         $api_password,
         $captcha_server_url = 'http://captcha.confidenttechnologies.com',
-        $library_version = '20100910_PHP_1.2.2', $use_shortcuts = FALSE)
+        $library_version = '20110315_PHP_1.2.3', $use_shortcuts = FALSE)
     {
         $this->customer_id = $customer_id;
         $this->site_id = $site_id;
@@ -323,6 +323,20 @@ class CCAP_Api
             if ($form) {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $form);
             }
+        }
+        
+        # Set SSL verification options
+        $ssl_url = "https://";
+        $surl = substr($url, 0, strlen($ssl_url));
+        if (strcmp($surl, $ssl_url) == 0) {
+          if (!empty($ccap_curlopt_capath)) {
+            curl_setopt($ch, CURLOPT_CAPATH, $ccap_curlopt_capath);
+          } elseif (!empty($ccap_curlopt_cainfo)) {
+            curl_setopt($ch, CURLOPT_CAPATH, $ccap_curlopt_cainfo);
+          } else {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+          }
         }
 
         curl_setopt($ch, CURLOPT_URL, $url);

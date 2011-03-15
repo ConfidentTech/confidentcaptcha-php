@@ -95,7 +95,7 @@ echo <<<HTML
   </style>
   <!-- Confident CAPTCHA requires jquery -->
   <script type='text/javascript'
-    src='http://code.jquery.com/jquery-1.4.2.min.js'></script>
+    src='//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
 </head>
 <body>
   <h1>Contact Us</h1>

@@ -8,10 +8,25 @@ $ccap_api_settings = array(
     'api_password' => ''
 );
 
-/* URL of the CAPTCHA API server.  You shouldn't need to modify this, unless
- * you are running your own captcha service.
+/* URL of the CAPTCHA API server.
+ * Use the first option if your page is an HTTP page.
+ * Use the second option if your page is an HTTPS page.
+ * Most browsers won't care either way, but if your page is an HTTPS page, IE
+ *  will display a warning unless you use the second option.
  */
 $ccap_server_url = 'http://captcha.confidenttechnologies.com/';
+#$ccap_server_url = 'https://captcha.confidenttechnologies.com/';
+
+/* If you are using the HTTPS URL, you can verify the certificate in one
+ * of two ways.  You can set ccap_curlopt_cainfo to the absolute path to a
+ * certificate file.  You can set ccap_curlopt_capath to the absolute path to
+ * a certificate folder.  If you leave both empty, then certificate chain
+ * verification is skipped.  See CURLOPT_CAINFO and CURLOPT_CAPATH in
+ * http://www.php.net/manual/en/function.curl-setopt.php
+ * for more details.
+ */
+$ccap_curlopt_capath = '';
+$ccap_curlopt_cainfo = '';
 
 /* The path to the callback function, used in the multiple CAPTCHA method.
  * If you place callback.php in the same folder as the form that contains

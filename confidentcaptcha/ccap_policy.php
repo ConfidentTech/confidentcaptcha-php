@@ -327,7 +327,9 @@ class CCAP_Policy
         $not_set = '(NOT SET)';
         $url = $this->api->captcha_server_url;
         $expected_url = 'http://captcha.confidenttechnologies.com/';
-        if ($url == $expected_url) {
+        $ssl_expected_url = 'https://captcha.confidenttechnologies.com/';
+        $disp_expected_url = 'http(s)://captcha.confidenttechnologies.com/';
+        if ($url == $expected_url or $url == $ssl_expected_url) {
             $url_supported = 'Yes';
         } elseif (empty($url)) {
             $url = $not_set;
@@ -337,7 +339,7 @@ class CCAP_Policy
         } else {
             $url_supported = 'No';
         }
-        $local_config[] = array('ccap_server_url', $url, $expected_url,
+        $local_config[] = array('ccap_server_url', $url, $disp_expected_url,
             $url_supported);
 
         // Check API parameters
